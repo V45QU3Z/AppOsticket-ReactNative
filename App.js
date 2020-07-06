@@ -1,19 +1,18 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import 'react-native-gesture-handler';
+
+import React, { useState } from 'react';
+import Login from './app/screens/login/Login';
+import Navigation from './app/screens/drawer/navigation/Nagivation';
+import { View } from 'react-native';
+import Snackbar from './app/components/snackbar'
+import SplashScreen from './app/components/SplashScreen'
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-    </View>
-  );
+
+    return ( 
+      
+            <Navigation></Navigation>
+        
+    );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
