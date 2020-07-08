@@ -71,7 +71,7 @@ export default function TicketsList() {
             {data.isLoading ? 
             <View style={styles.contentLoading}> 
                 <ActivityIndicator size='large' color='#FF7713'></ActivityIndicator>
-                <Text style={{marginVertical: 10, color: '#FF7713'}}>Loading...</Text>
+                <Text style={{marginVertical: 10, color: '#FF7713'}}>Loading tickets...</Text>
             </View>
             :
             
@@ -81,9 +81,11 @@ export default function TicketsList() {
                 <FlatList style={styles.flatlist} data={data.data} extraData={data} 
                 refreshing={data.refreshing} onRefresh={refreshList} renderItem={({item}) => (
                 <View style={styles.contentview}>
-                    <Text style={styles.itemtitle}>{item.ticket_number}</Text>
+                    <Text style={styles.itemtitle}>{item.ticket_number} <Text style={{color: 'green'}}>({item.thread_entries.length})</Text></Text>
                     <List.Item style={styles.listitem} title={item.subject} 
-                    description={item.create_timestamp +' - '+ item.ticket_status}
+                    titleStyle={{color: '#2C2C2C', fontSize: 15}}
+                    descriptionStyle={{fontSize: 12}}
+                    description={'Created - '+item.create_timestamp+'    Status - '+item.ticket_status}
                     onPress={() => navigation.navigate('TicketDetail', item)}
                     //left={props => <List.Icon {...props} icon="folder" />}
                     />
@@ -104,7 +106,8 @@ const styles = StyleSheet.create({
         width: '100%',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        paddingBottom: 10
     },
     contentLoading: {
         display: 'flex',
@@ -119,7 +122,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         //backgroundColor: 'green',
         width: '100%',
-        top: 15
+        top: 0
     },
     contentview: {
         elevation: 1,
@@ -141,7 +144,9 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         paddingHorizontal: 18,
         fontSize: 15,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        borderBottomWidth: 1,
+        borderBottomColor: '#DADADA'
     },
     listitem: {
         //backgroundColor: 'gray',

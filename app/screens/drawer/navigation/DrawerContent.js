@@ -1,15 +1,39 @@
 import React, { useEffect } from 'react'
-import { Button, StyleSheet, View, ImageBackground } from 'react-native';
+import { Button, StyleSheet, View, ImageBackground, Alert, ActivityIndicator } from 'react-native';
 import { createDrawerNavigator, DrawerItem, DrawerContentScrollView } from '@react-navigation/drawer';
 import { Caption, Avatar, Title, Paragraph, Drawer, Text, TouchableRipple, Switch, Card} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-community/async-storage';
 //use context
 import { AuthContext } from '../../../context';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 export default function DrawerContent(props) {
 
   const { signOut } = React.useContext(AuthContext);
+
+  function Logout() {
+    return(
+      Alert.alert("Logout","You want to log out?",[{
+        text: "CANCEL",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel"
+      },
+      { text: "EXIT", onPress: () => {signOut()} }],
+      { cancelable: false }
+    )
+    )
+  }
+
+  function Setting() {
+    return(
+      Alert.alert("Settings","Not available",[{
+        text: "CLOSE",
+        onPress: () => console.log("Cancel Pressed")
+      }]
+    ))
+  }
+
 
   function showProfile(){
     /* let email = await AsyncStorage.getItem('email');
@@ -77,7 +101,7 @@ export default function DrawerContent(props) {
                                 <Icon name="settings" color={color} size={size}/>
                             )}
                             label="Settings"
-                            onPress={() => {props.navigation.navigate('Home')}}
+                            onPress={() => {Setting()}}
                         />
                     </Drawer.Section>
 
@@ -86,9 +110,9 @@ export default function DrawerContent(props) {
             <Drawer.Section style={styles.bottomDrawerSection}>
                 <DrawerItem
                     icon={({color, size}) => (
-                    <Icon name="exit-to-app" color={color} size={size}></Icon>
+                    <FontAwesome5 name="power-off" color={color} size={size}></FontAwesome5>
                     )}
-                    label='Sing Out' onPress={() => {signOut()}}
+                    label='Sign Out' onPress={() => {Logout()}}
                 >
                 </DrawerItem>
             </Drawer.Section>

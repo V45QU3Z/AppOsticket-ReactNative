@@ -1,5 +1,5 @@
 import React from 'react'
-import {Text, Modal,ActivityIndicator, View, TextInput, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native'
+import {Text, Modal,ActivityIndicator, TextInput, View, StyleSheet, TouchableOpacity, Image, Alert, Dimensions } from 'react-native'
 import {Card, Button, Snackbar} from 'react-native-paper';
 import {Feather, AntDesign, FontAwesome, FontAwesome5} from 'react-native-vector-icons';
 import { AuthContext } from '../../context';
@@ -7,16 +7,16 @@ import User from '../../models/users';
 import AuthService from '../../services/Auth';
 import SplashScreen from '../../components/SplashScreen';
 import { color } from 'react-native-reanimated';
+import SnackBar from '../../components/SnackBar';
+import { SnackBarr } from '../../components/SnackBarr';
 
-export default function Login({navigation}) {
-
-    const [alert, useAlert] = React.useState(false);
-    const [dismiss, setDismiss] = React.useState(false);
+export default function Login() {
+    const [visible, setVisible] = React.useState({
+        snack: false,
+        loading: false
+    });
+    const _onDismissSnackBar = () => setVisible({snack: false});
     
-    const [visible, setVisible] = React.useState(true);
-    const _onToggleSnackBar = () => setVisible(visible ? false : true)
-    const _onDismissSnackBar = () => setVisible(false);
-
     const [modalVisible, setModalVisible] = React.useState(false);
 
     const [data, setData] = React.useState({
@@ -25,14 +25,14 @@ export default function Login({navigation}) {
         checkInputChange: false,
         securePassEntry: true
     });
-    const [loading, setLoading] = React.useState(false);
+
     //use conext
     const { signIn } = React.useContext(AuthContext);
 
 
     //validation InputText
     const textInputChange=(val)=>{
-        if(val.trim().length >= 3){
+        if(val.trim().match('@')){
             setData({
                 ...data,
                 username: val,
@@ -60,46 +60,32 @@ export default function Login({navigation}) {
         })
     }
 
-    /* const loginHandle = (username, password) => {
-        signIn(username, password);
-    } */
+    function isValidate(){
+        setVisible({
+            loading: true,
+            snack: true
+        })
+    }
 
     const login =async(username, password)=>{
         let us=new User(); 
-        
         if(username.length == 0 && password.length == 0){
-            setModalVisible(true);
-            setTimeout(() => {
-                 return(
-                    Alert.alert(
-                        'Error!','Username or Password is invalid!!',[
-                          {text: 'Ok', onPress: () => setModalVisible(false), style:'destructive'},
-                          
-                    ]) 
-                 );   
-            }, 2000)
+            return (
+                isValidate()
+            );
         }
-
         let user = await AuthService.signIn(username, password);
-        //console.log(user)
-        if(username==user.email && password==password){
+        console.log(user)
+        if(!user){
+            return(
+                isValidate()
+            )
+        }else{
             setModalVisible(true)
             setTimeout(() => {
                 signIn(user);
             }, 3000)
-            console.log(user);
-            //signIn(user);
-        }else{
-            setModalVisible(true);
-            setTimeout(() => {
-                 return(
-                    Alert.alert(
-                        'Error!','Username or Password is empty!!',[
-                          {text: 'Ok', onPress: () => setModalVisible(false), style:'destructive'},     
-                    ]) 
-                 );   
-            }, 2000)
-            console.log('Error: datos incorrectos')
+            //console.log(user);
         } 
        
     }
@@ -165,12 +151,27 @@ export default function Login({navigation}) {
                 <View style={styles.action}>
                     <Button 
                         style={styles.btnSingIn}
-                        mode="contained" loading={loading} 
+                        mode="contained" loading={visible.loading} 
                         onPress={init}
                     >Sign In</Button>
                 </View>
                 
             </View>
+
+            <Snackbar
+                style={{backgroundColor: '#ffcdd2', width: '70%',position: 'absolute', right: 0, marginHorizontal: 0}}
+                wrapperStyle={{position: 'absolute', top: 20}}
+                visible={visible.snack}
+                duration={2000}
+                onDismiss={_onDismissSnackBar}
+                action={{
+                    label: <FontAwesome
+                    name='exclamation-circle' color='#E31500' size={25}/>,
+                    onPress: () => {}
+                }}
+            >
+          <Text style={{color: '#E31500', fontWeight: 'bold'}}>Email or Password is Invalid! </Text>
+        </Snackbar>
             {/* <View style={styles.footer}>
 
             </View> */}
@@ -184,12 +185,11 @@ export default function Login({navigation}) {
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <ActivityIndicator size='large' color='orange'></ActivityIndicator>
-                            <Text style={styles.please}>Please await...</Text>
+                            <Text style={styles.please}>Please wait...</Text>
                         </View>
                     </View>
                 </Modal>
             </View>
-
         </View>
     )
 }

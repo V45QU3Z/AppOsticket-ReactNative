@@ -4,12 +4,14 @@ import TicketsScreen from '../screens/TicketsScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TicketsList from '../tickets/TicketsList';
 import DetTicketScreen from '../screens/DetTicketScreen';
+import { useNavigation } from '@react-navigation/native';
+
 const TicketStack = createStackNavigator();
 const DetTicketStk = createStackNavigator();
 
 export default function TicketsStack({navigation}){
     return(
-        <TicketStack.Navigator screenOptions={{
+        <TicketStack.Navigator initialRouteName='Tickets' screenOptions={{
             headerStyle: {
                 backgroundColor: '#FF943B',
                 headerTintColor: '#fff'
@@ -28,11 +30,11 @@ export default function TicketsStack({navigation}){
                 options={{
                     title: 'Detail of Tickets',
                     headerTintColor: '#fff',
-                    headerLeft: () => (
+                    /* headerLeft: () => (
                         <Icon.Button name="ios-arrow-back" size={30} backgroundColor="#FF943B"
-                        onPress={() => navigation.goBack()}
+                        onPress={() => navigation.goBack(null)}
                         ></Icon.Button>
-                    )
+                    ) */
                     }}
             ></DetTicketStk.Screen>
         </TicketStack.Navigator>

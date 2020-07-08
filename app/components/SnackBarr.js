@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Snackbar } from 'react-native-paper';
 
-export default class SnackBar extends Component {
+export default class SnackBarr extends Component {
 
     state = {
         visible: false,

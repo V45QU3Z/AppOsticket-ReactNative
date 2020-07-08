@@ -2,14 +2,20 @@ import React, { useEffect } from 'react';
 import { Text, View, Button, StyleSheet, TouchableOpacity, Alert, Modal,
   TouchableHighlight, ScrollView
 } from 'react-native';
-import TicketsList from './TicketsList';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { TextInput } from 'react-native-paper';
+import { TextInput, Snackbar } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
 import TicketService from '../../../services/Tickets';
-import SnackBarr from '../../../components/SnackBarr'
+import {Feather, FontAwesome} from 'react-native-vector-icons';
 
 export default function NewTicket({navigation}) {
+  const [visible, setVisible] = React.useState({
+    snack: false,
+    loading: false,
+    snackError: false
+  });
+  const _onDismissSnackBar = () => setVisible({snack: false});
+  const _onDismissSnackBarError = () => setVisible({snackError: false});
 
   const [modalVisible, setModalVisible] = React.useState(false);
   const [data, setData] = React.useState({
@@ -55,16 +61,45 @@ export default function NewTicket({navigation}) {
   
   //const info_user = getEmailAndName();
 
+    function isCreated(){
+      setVisible({
+        snack: true
+      })
+    }
+    function isError(){
+      setVisible({
+        snackError: true
+      })
+    }
+    function isErrorOnServer(){
+      setModalVisible(!modalVisible);
+      Alert.alert('Error', 'Server not conected!',[{
+        text: 'CLOSE', onPress: () => {}
+      }]);
+    }
+
   async function saveTicket() {
     //console.log(data);
-    try {
-      let user = await TicketService.create(data);
-      console.log(user);
-      //setModalVisible(!modalVisible);
-      //<SnackBarr></SnackBarr>
-    } catch (error) {
-      console.log('Error create: ', error);
+    if(data.subject=='' || data.message==''){
+      return(
+        isError()
+      )
+    }else{
+      try {
+        let user = await TicketService.create(data);
+        if(!user){
+          return(
+            isErrorOnServer()
+          )
+        }else{
+          setModalVisible(!modalVisible);
+          isCreated();
+        }
+      } catch (error) {
+        console.log('Error create: ', error);
+      }
     }
+    
   }
 
     return (
@@ -75,7 +110,22 @@ export default function NewTicket({navigation}) {
                         <Icon style={styles.btnNew} size={30} color='#0DB454' name='note-plus'></Icon>
                     </TouchableOpacity>
           </View>
-          
+
+          <Snackbar
+                style={{backgroundColor: '#dcedc8'}}
+                //wrapperStyle={{position: 'absolute', top: 15}}
+                visible={visible.snack}
+                duration={3000}
+                onDismiss={_onDismissSnackBar}
+                action={{
+                    label: <Feather
+                    name='check' color='#4caf50' size={25}/>,
+                    onPress: () => {}
+                }}
+            >
+          <Text style={{color: '#4caf50', fontWeight: 'bold'}}>Created successfully, refresh your screen</Text>
+          </Snackbar>
+
           <Modal animationType="slide" transparent={true} visible={modalVisible}
             onRequestClose={() => {
             Alert.alert("Please close the modal...!");
@@ -93,10 +143,10 @@ export default function NewTicket({navigation}) {
                   <TextInput label='Email' placeholder='Email' style={styles.inputText}
                     value={data.email} disabled={true}
                   ></TextInput>
-                  <TextInput label='Title' placeholder='example: support software' style={styles.inputText}
+                  <TextInput label='Title' mode='outlined' placeholder='Help Topic' style={styles.inputText}
                     onChangeText={(val)=> titleInputChange(val)}
                   ></TextInput>
-                  <TextInput label='Message' placeholder='Write a message...' style={styles.inputMessage}
+                  <TextInput label='Descriptión' mode='outlined' placeholder='Write a description...' style={styles.inputMessage}
                     underlineColorAndroid='transparent' multiline={true} numberOfLines={5}
                     onChangeText={(val)=> messageInputChange(val)}
                   ></TextInput>
@@ -121,6 +171,21 @@ export default function NewTicket({navigation}) {
               </View>
             </View>
 
+            <Snackbar
+                style={{backgroundColor: '#ffecb3', width: '70%', marginHorizontal: 20, marginTop: 20}}
+                wrapperStyle={{position: 'absolute', top: 60, alignItems: 'flex-end'}}
+                visible={visible.snackError}
+                duration={2000}
+                onDismiss={_onDismissSnackBarError}
+                action={{
+                    label: <FontAwesome
+                    name='warning' color='#ff9800' size={25}/>,
+                    onPress: () => {}
+                }}
+            >
+            <Text style={{color: '#ff9800', fontWeight: 'bold'}}>Fill in the empty fields </Text>
+          </Snackbar>
+
         </Modal>
 
       </View>
@@ -140,8 +205,8 @@ viewHeader:{
     borderBottomColor: '#E0E0E0',
 },
 titleMyTicket:{
-   fontSize: 18,
-   fontWeight: 'bold'
+   //fontSize: 18,
+   //fontWeight: 'normal'
 },
 btnContent: {
     position: 'absolute',
@@ -154,7 +219,7 @@ centeredView: {
   justifyContent: "center",
   alignItems: "center",
   marginTop: 55,
-  backgroundColor: '#000',
+  backgroundColor: '#212121',
   opacity: 1
 },
 modalView: {
@@ -178,9 +243,9 @@ contentForm: {
   width: 280,
   height: 150,
   borderRadius: 5,
-  borderWidth: 1,
+  //borderWidth: 1,
   borderColor: '#E0E0E0',
-  padding: 15
+  padding: 5,
 },
 inputText: {
   //flex: 1,
@@ -188,7 +253,7 @@ inputText: {
   marginVertical: 5,
   backgroundColor: '#fff',
   height: 50,
-  paddingHorizontal: 0
+  paddingHorizontal: 0,
 },
 inputMessage: {
   color: '#05375a',

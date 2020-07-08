@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, StyleSheet, Picker, Text, ScrollView } from 'react-native'
+import { View, StyleSheet, Picker, Text, ScrollView, Alert } from 'react-native'
 import { DataTable, ProgressBar, Colors } from 'react-native-paper';
 import DashboardService from '../../../services/Dashboard';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -134,7 +134,7 @@ export default function DTickets() {
                     })
             })
             .catch(err => {
-                console.log(err);
+                console.log(err)
             })
 
             return () => isSuscribed = false;
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
         //fontSize: 15
     },
     tableRowHeader: {
-        backgroundColor: '#ffebee'
+        backgroundColor: '#FFE0C7'
     },
 
     /* tableRow: {
