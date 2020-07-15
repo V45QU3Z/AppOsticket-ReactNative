@@ -84,23 +84,23 @@ export default function DrawerContent(props) {
                 <Drawer.Section style={styles.drawerSection}>
                         <DrawerItem 
                             icon={({color, size}) => (
-                                <Icon name="home-outline" color={color} size={size}/>
+                                <Icon name="home-outline" color='#0277bd' size={size}/>
                             )}
-                            label="Home"
+                            label="Home" labelStyle={{color:'#0277bd'}}
                             onPress={() => {props.navigation.navigate('Home')}}
                         />
                         <DrawerItem 
                             icon={({color, size}) => (
-                                <Icon name="ticket" color={color} size={size}/>
+                                <Icon name="ticket" color='#0277bd' size={size}/>
                             )}
-                            label="Tickets"
+                            label="Tickets" labelStyle={{color:'#0277bd'}}
                             onPress={() => {props.navigation.navigate('Tickets')}}
                         />
                         <DrawerItem 
                             icon={({color, size}) => (
-                                <Icon name="settings" color={color} size={size}/>
+                                <Icon name="settings" color='#0277bd' size={size}/>
                             )}
-                            label="Settings"
+                            label="Settings" labelStyle={{color:'#0277bd'}}
                             onPress={() => {Setting()}}
                         />
                     </Drawer.Section>
@@ -110,9 +110,9 @@ export default function DrawerContent(props) {
             <Drawer.Section style={styles.bottomDrawerSection}>
                 <DrawerItem
                     icon={({color, size}) => (
-                    <FontAwesome5 name="power-off" color={color} size={size}></FontAwesome5>
+                    <FontAwesome5 name="power-off" color='#0277bd' size={size}></FontAwesome5>
                     )}
-                    label='Sign Out' onPress={() => {Logout()}}
+                    label='Sign Out' labelStyle={{color:'#0277bd'}} onPress={() => {Logout()}}
                 >
                 </DrawerItem>
             </Drawer.Section>

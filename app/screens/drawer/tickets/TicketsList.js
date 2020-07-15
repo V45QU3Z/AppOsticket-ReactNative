@@ -6,7 +6,8 @@ import { List, Button } from 'react-native-paper';
 import NewTicket from './NewTicket';
 import TicketsScreen from '../screens/TicketsScreen';
 import { CommonActions } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { set } from 'react-native-reanimated';
 
 export default function TicketsList() {
 
@@ -18,7 +19,7 @@ export default function TicketsList() {
         expanded: true,
         refreshing: false
     });
-    
+
     const showTickets = async(email, apikey) => {
         try {
             let result = await TicketsService.getAllTickets(email, apikey);
@@ -35,19 +36,12 @@ export default function TicketsList() {
         }
     }
 
-    const tnumber = async(number) => {
-        let result = await TicketsService.getAllTicketsNumber(number);
-        let res = result.ticket;
-        console.log(res)
-    }
-
-    useEffect(() => {
+     useEffect(() => {
         AsyncStorage.getItem('userToken')
             .then(apikey => {
                 AsyncStorage.getItem('email')
                     .then(email => {
                         showTickets(email, apikey);
-                        tnumber('129661');
                     })
             })
             .catch(e => {console.log(e)})
@@ -61,27 +55,74 @@ export default function TicketsList() {
         }); 
     }
 
-    const detail = () => {
-        console.log('pressed detail ticket')
-        //navigation.navigate('Details');
+    useFocusEffect(
+        React.useCallback(() => {
+            setData({
+                isLoading: true
+            })
+            AsyncStorage.getItem('userToken')
+            .then(apikey => {
+                AsyncStorage.getItem('email')
+                    .then(email => {
+                        showTickets(email, apikey);
+                    })
+            })
+            .catch(e => {console.log(e)})
+          return () => {
+            //alert('other unfocused');
+           refreshList
+          };
+        }, [])
+    );
+    
+    function add(){
+        return(
+            <NewTicket></NewTicket>
+        )
     }
+
+    function dateCurrent(){
+        let date = new Date();
+        let day = date.getDate();
+        let month = date.getMonth()+1;
+        let year = date.getFullYear().toString().substr(-2);
+        if (month<10){
+                month = '0'+month;
+        }
+        if(day<10){
+            day= '0' +day
+        }
+        return year+'-'+month+'-'+day;
+    }
+       
+    
+    //newAdded()
 
         return (
            <View style={styles.container}>
             {data.isLoading ? 
             <View style={styles.contentLoading}> 
-                <ActivityIndicator size='large' color='#FF7713'></ActivityIndicator>
-                <Text style={{marginVertical: 10, color: '#FF7713'}}>Loading tickets...</Text>
+                <ActivityIndicator size='large' color='#4caf50'></ActivityIndicator>
+                <Text style={{marginVertical: 10, color: '#4caf50'}}>Loading tickets...</Text>
             </View>
             :
             
             <View style={styles.container}>
-                <NewTicket></NewTicket> 
+                {add()}
                {/*  <ScrollView style={{width: '100%'}}> */}
                 <FlatList style={styles.flatlist} data={data.data} extraData={data} 
                 refreshing={data.refreshing} onRefresh={refreshList} renderItem={({item}) => (
                 <View style={styles.contentview}>
-                    <Text style={styles.itemtitle}>{item.ticket_number} <Text style={{color: 'green'}}>({item.thread_entries.length})</Text></Text>
+                    <View style={styles.itemtitle}>
+                    <Text style={styles.t_number}>{item.ticket_number}</Text>
+                    <View style={styles.newContent}> 
+                        {item.create_timestamp.match(dateCurrent()) ? 
+                        <Text style={styles.new}>New</Text> 
+                        : 
+                        <Text style={styles.qunatity}>{item.thread_entries.length}</Text>
+                        }
+                    </View>
+                    </View>
                     <List.Item style={styles.listitem} title={item.subject} 
                     titleStyle={{color: '#2C2C2C', fontSize: 15}}
                     descriptionStyle={{fontSize: 12}}
@@ -128,7 +169,7 @@ const styles = StyleSheet.create({
         elevation: 1,
         //borderColor: 'gray',
         marginVertical: 5,
-        shadowColor: '#E0E0E0',
+        shadowColor: '#b3e5fc',
         shadowRadius: 3,
         shadowOffset: {
             width: 1,
@@ -136,17 +177,44 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.5,
         borderRadius: 3,
-        borderColor: '#E0E0E0',
+        borderColor: '#b3e5fc',
         borderWidth: 1,
     },
     itemtitle:{
-        backgroundColor: '#FFE0C7',
+        backgroundColor: '#b3e5fc',
         paddingVertical: 5,
         paddingHorizontal: 18,
+        borderBottomWidth: 1,
+        borderBottomColor: '#DADADA',
+        //flexDirection: 'row',
+        //alignSelf: 'stretch' 
+        justifyContent:'center'
+    },
+    t_number: {
         fontSize: 15,
         fontWeight: 'bold',
-        borderBottomWidth: 1,
-        borderBottomColor: '#DADADA'
+    },
+    newContent: {
+        position: 'absolute',
+        right: 10,
+    },
+    new: {
+        backgroundColor: '#4caf50',
+        color: '#fff',
+        borderRadius: 3,
+        fontSize: 12,
+        paddingHorizontal: 4,
+        paddingVertical: 3,
+        fontWeight: 'bold',
+    },
+    qunatity: {
+        backgroundColor: '#0277bd',
+        color: '#fff',
+        borderRadius: 100,
+        width: 20,
+        height: 20,
+        textAlign: 'center',
+        fontWeight: 'bold'
     },
     listitem: {
         //backgroundColor: 'gray',

@@ -15,6 +15,7 @@ export default function Login() {
         snack: false,
         loading: false
     });
+
     const _onDismissSnackBar = () => setVisible({snack: false});
     
     const [modalVisible, setModalVisible] = React.useState(false);
@@ -72,6 +73,7 @@ export default function Login() {
         if(username.length == 0 && password.length == 0){
             return (
                 isValidate()
+                //setModalVisible(true)
             );
         }
         let user = await AuthService.signIn(username, password);
@@ -80,13 +82,17 @@ export default function Login() {
             return(
                 isValidate()
             )
-        }else{
+        }if(username==user.email && password==password){
             setModalVisible(true)
             setTimeout(() => {
                 signIn(user);
             }, 3000)
             //console.log(user);
-        } 
+        }else{
+            return(
+                isValidate()
+            )
+        }
        
     }
 
@@ -98,47 +104,34 @@ export default function Login() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                {/* <Text style={{fontSize: 40}}>SIGN IN</Text> */}
-                <View>
+                <View style={styles.imageContent}>
                 <Image
-                    style={styles.logo}
+                    style={styles.logo} resizeMode='stretch'
                     source={require('../../../assets/osticket.png')}/>
                 </View>
             </View>
             <View style={styles.main}>
                 <View style={styles.action}>
                     <FontAwesome
-                        name='user-circle' color='#006' size={25}
-                    />
-                    <TextInput
-                        placeholder='Email' 
-                        style={styles.textInput}
-                        autoCapitalize='none'
-                        onChangeText={(val)=> textInputChange(val)}
+                        name='user-circle' color='#006' size={25}/>
+                    <TextInput placeholder='Email' style={styles.textInput}
+                        autoCapitalize='none'onChangeText={(val)=> textInputChange(val)}
                     ></TextInput>
 
                     {data.check_TextInputChange ?
-                    <Feather
-                     name='check' color='green' size={20}
-                    />
+                    <Feather name='check' color='green' size={20}/>
                     : 
-                    <FontAwesome
-                     name='exclamation-circle' color='gray' size={20}/>
+                    <FontAwesome name='exclamation-circle' color='gray' size={20}/>
                     }
-
                 </View>
+
                 <View style={styles.action}>
-                    <FontAwesome5
-                        name='lock' color='#006' size={25}
-                    />
-                    <TextInput
-                        placeholder='Password' 
+                    <FontAwesome5 name='lock' color='#006' size={25}/>
+                    <TextInput placeholder='Password' 
                         secureTextEntry={data.securePassEntry ? true : false}
-                        style={styles.textInput}
-                        autoCapitalize='none'
+                        style={styles.textInput} autoCapitalize='none'
                         onChangeText={(val)=> passwdInputChange(val)}
                     ></TextInput>
-
                     <TouchableOpacity onPress={updateSecureEntryPasswd} >
                         {data.securePassEntry ?
                         <Feather name='eye-off' color='gray' size={20}/>
@@ -146,20 +139,18 @@ export default function Login() {
                         <Feather name='eye' color='green' size={20}/>
                         }
                     </TouchableOpacity>
-
                 </View>
-                <View style={styles.action}>
-                    <Button 
-                        style={styles.btnSingIn}
-                        mode="contained" loading={visible.loading} 
-                        onPress={init}
-                    >Sign In</Button>
+
+                <View style={styles.actionContent}>
+                    <Button style={styles.btnSingIn} mode="contained" 
+                    loading={visible.loading} onPress={init}>Sign In</Button>
                 </View>
                 
             </View>
 
             <Snackbar
-                style={{backgroundColor: '#ffcdd2', width: '70%',position: 'absolute', right: 0, marginHorizontal: 0}}
+                style={{backgroundColor: '#ffcdd2', width: '70%',position: 
+                'absolute', right: 0, marginHorizontal: 0}}
                 wrapperStyle={{position: 'absolute', top: 20}}
                 visible={visible.snack}
                 duration={2000}
@@ -170,7 +161,8 @@ export default function Login() {
                     onPress: () => {}
                 }}
             >
-          <Text style={{color: '#E31500', fontWeight: 'bold'}}>Email or Password is Invalid! </Text>
+          <Text style={{color: '#E31500', fontWeight: 'bold'}}>
+              Email or Password is Invalid! </Text>
         </Snackbar>
             {/* <View style={styles.footer}>
 
@@ -184,12 +176,13 @@ export default function Login() {
                     Alert.alert("Modal has been closed.");}}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <ActivityIndicator size='large' color='orange'></ActivityIndicator>
+                            <ActivityIndicator size='large' color='#fff'></ActivityIndicator>
                             <Text style={styles.please}>Please wait...</Text>
                         </View>
                     </View>
                 </Modal>
             </View>
+            
         </View>
     )
 }
@@ -200,11 +193,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    logo: {
+    imageContent: {
         minWidth: 200,
         maxWidth: 220,
-        minHeight: 80,
-        maxHeight: 90
+        minHeight: 100,
+        maxHeight: 120,
+    },
+    logo: {
+       minWidth: 200,
+       maxWidth: 200,
+       minHeight: 100,
+       maxHeight: 140,
     },
     header:{
         flex: 2,
@@ -239,6 +238,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5
         //borderBottomColor: 'FF7713'
     },
+    actionContent:{
+        flexDirection: 'row',
+        display: 'flex',
+        alignItems: 'center',
+        marginVertical: 10,
+        minWidth: 300,
+        marginVertical: 10,
+        paddingHorizontal: 5
+        //borderBottomColor: 'FF7713'
+    },
     textInput: {
         flex: 1,
         paddingLeft: 10,
@@ -249,9 +258,10 @@ const styles = StyleSheet.create({
         //width: 300
     },
     btnSingIn:{
-        paddingVertical: 4,
+        paddingVertical: 5,
         minWidth: 300,
-        backgroundColor: '#FF7713'
+        backgroundColor: '#0277bd',
+        elevation: 3
     },
     footer:{
         flex: 1,
@@ -266,12 +276,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         //marginTop: 22,
-        backgroundColor: '#000',
-        opacity: 0.7
+        backgroundColor: '#002949',
+        opacity: 0.8
       },
       modalView: {
         margin: 20,
-        backgroundColor: "#000",
+        backgroundColor: "#0277bd",
         //opacity: 0,
         borderRadius: 15,
         padding: 35,
@@ -283,11 +293,13 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
-        elevation: 5
+        elevation: 5,
+        borderWidth: 1,
+        borderColor: '#01579b'
       },
       please: {
           marginVertical: 10,
-          color: 'orange'
+          color: '#fff'
       },
       
 

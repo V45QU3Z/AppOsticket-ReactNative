@@ -13,7 +13,7 @@ export default function TicketsStack({navigation}){
     return(
         <TicketStack.Navigator initialRouteName='Tickets' screenOptions={{
             headerStyle: {
-                backgroundColor: '#FF943B',
+                backgroundColor: '#0277bd',
                 headerTintColor: '#fff'
                 }
             }}>
@@ -21,7 +21,7 @@ export default function TicketsStack({navigation}){
                 title: 'Ticket List', 
                 headerTintColor: '#fff',
                 headerLeft: () => (
-                    <Icon.Button name="ios-menu" size={30} backgroundColor="#FF943B"
+                    <Icon.Button name="ios-menu" size={30} backgroundColor="#0277bd"
                     onPress={() => navigation.openDrawer()}
                     ></Icon.Button>
                 )

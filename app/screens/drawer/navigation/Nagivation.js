@@ -5,8 +5,7 @@ import HomesStack from '../stacks/HomeStack';
 import TicketsStack from '../stacks/TicketsStack';
 import DrawerContent from '../navigation/DrawerContent';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { View } from 'react-native';
-import {ActivityIndicator} from 'react-native-paper';
+import { View, ActivityIndicator } from 'react-native';
 import { AuthContext } from '../../../context';
 import User from '../../../models/users';
 import RootStack from '../stacks/RootStack';
@@ -112,7 +111,7 @@ export default function Navigation(){
     if( loginState.isloading ) {
     return(
       <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-        <ActivityIndicator size={40} color="#FF7713"/>
+        <ActivityIndicator size={40} color="#0277bd"/>
       </View>
     );
   }

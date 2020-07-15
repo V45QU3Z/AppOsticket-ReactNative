@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { View, StyleSheet, Picker, Text, ScrollView, Alert } from 'react-native'
+import { View, StyleSheet, Picker, Text, ActivityIndicator, Alert } from 'react-native'
 import { DataTable, ProgressBar, Colors } from 'react-native-paper';
 import DashboardService from '../../../services/Dashboard';
 import AsyncStorage from '@react-native-community/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
-export default function DTickets() {
+export default function DTickets({navigation}) {
     
     function dateCurrent(){
         let date = new Date();
@@ -13,6 +14,9 @@ export default function DTickets() {
         let year = date.getFullYear().toString().substr(-2);
         if (month<10){
                 month = '0'+month;
+        }
+        if(day<10){
+            day= '0' +day
         }
         return day+'/'+month+'/'+year;
     }
@@ -67,6 +71,8 @@ export default function DTickets() {
         closed_today: ''
     });
 
+    const [loading, setLoading] = useState(true);
+
     async function showMainTickets(mes, anio, apikey){
         try {
             let result = await DashboardService.getAllDashboard(mes, anio, apikey);
@@ -79,6 +85,7 @@ export default function DTickets() {
                 reg_today: result.t_registered_today,
                 closed_today: result.t_closed_today
             })
+            setLoading(false)
             //console.log(ticket)
         } catch (error) {
           console.log(error);  
@@ -104,6 +111,7 @@ export default function DTickets() {
                 reg_today: result.t_reg_today_others,
                 closed_today: result.t_closed_today_others
             });
+            setLoading(false)
             //console.log(result)
         } catch (error) {
           console.log(error);  
@@ -116,6 +124,17 @@ export default function DTickets() {
         }
        
     }, [selectDate.month, selectDate.year])
+
+    useFocusEffect(
+        React.useCallback(() => {
+          //alert('Screen was focused');
+          let isSuscribed = true;
+          if(isSuscribed){
+            refreshTable();
+          }
+          return () => isSuscribed = false;
+        }, [])
+      );
 
     useEffect(() => {
         let isSuscribed = true;
@@ -142,6 +161,7 @@ export default function DTickets() {
 
     function refreshTable(){
         //console.log(selectDate.month)
+        setLoading(true)
             AsyncStorage.getItem('userToken')
                 .then(apikey => {
                     showMainTickets(selectDate.month, selectDate.year, apikey);
@@ -209,7 +229,14 @@ export default function DTickets() {
                     </Picker>
                 </View>
             </View>
-            <DataTable style={styles.table}>
+            {loading == true ? 
+            <View style={styles.contentLoading}> 
+                <ActivityIndicator size='large' color='#4caf50'></ActivityIndicator>
+                <Text style={{marginVertical: 10, color: '#4caf50'}}>Loading dashboard...</Text>
+            </View>
+            :
+            <View>
+                <DataTable style={styles.table}>
                 <DataTable.Header style={styles.tableRowHeader}>
                     <DataTable.Title><Text style={styles.titleHeader}>Status</Text></DataTable.Title>
                     <DataTable.Title numeric><Text style={styles.titleHeader}>General</Text></DataTable.Title>
@@ -266,6 +293,8 @@ export default function DTickets() {
                     label="1-2 of 6"
                 /> */}
             </DataTable>
+            </View>  
+            }
         </View>
     )
 }
@@ -275,6 +304,14 @@ const styles = StyleSheet.create({
         flex: 1,
         //backgroundColor: '#009',
         width: '100%'
+    },
+    contentLoading: {
+        flex: 1,
+        //height: '100%',
+        //marginVertical: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
     },
     contentHeader: {
         marginBottom: 20
@@ -300,8 +337,8 @@ const styles = StyleSheet.create({
     },
     table: {
         borderWidth: 1,
-        borderColor: '#E0E0E0',
-        shadowColor: 'gray',
+        borderColor: '#b3e5fc',
+        shadowColor: '#b3e5fc',
         shadowOffset: {
             width: 1,
             height: 2
@@ -315,7 +352,7 @@ const styles = StyleSheet.create({
         //fontSize: 15
     },
     tableRowHeader: {
-        backgroundColor: '#FFE0C7'
+        backgroundColor: '#b3e5fc'
     },
 
     /* tableRow: {

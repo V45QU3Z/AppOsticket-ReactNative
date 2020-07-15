@@ -112,7 +112,7 @@ export default function NewTicket({navigation}) {
           </View>
 
           <Snackbar
-                style={{backgroundColor: '#dcedc8'}}
+                style={{backgroundColor: '#c8e6c9'}}
                 //wrapperStyle={{position: 'absolute', top: 15}}
                 visible={visible.snack}
                 duration={3000}
@@ -123,7 +123,7 @@ export default function NewTicket({navigation}) {
                     onPress: () => {}
                 }}
             >
-          <Text style={{color: '#4caf50', fontWeight: 'bold'}}>Created successfully, refresh your screen</Text>
+          <Text style={{color: 'green', fontWeight: 'bold'}}>Created successfully, refresh your screen</Text>
           </Snackbar>
 
           <Modal animationType="slide" transparent={true} visible={modalVisible}
@@ -136,7 +136,7 @@ export default function NewTicket({navigation}) {
 
                 <View style={styles.contentForm}>
                   <ScrollView>
-                  <Text style={styles.modalText}>Create New Ticket</Text>
+                  <Text style={styles.modalText}>Create a new ticket</Text>
                   <TextInput label='Fullname' placeholder='Fullname' style={styles.inputText}
                     value={data.name} disabled={true}
                   ></TextInput>
@@ -264,7 +264,7 @@ inputMessage: {
   justifyContent: 'flex-start'
 },
 openButton: {
-  backgroundColor: "#0DB454",
+  backgroundColor: "#4caf50",
   borderRadius: 200,
   //padding: 10,
   elevation: 10,
@@ -285,7 +285,8 @@ modalText: {
   marginBottom: 15,
   textAlign: "center",
   fontSize: 20,
-  fontWeight: 'bold'
+  fontWeight: 'bold',
+  color: '#4caf50'
 },
 contentFooter: {
   //flex: 1,

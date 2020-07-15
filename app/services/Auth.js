@@ -2,9 +2,9 @@ import { environment } from '../../environment/environment';
 
 export default class AuthServcie {
 
-    static async signIn(username, password){
+    static async signIn(email, password){
         try {
-            let result = await fetch(`${environment.AUTH_URL}?email=${username}&password=${password}`);
+            let result = await fetch(`${environment.AUTH_URL}?email=${email}&password=${password}`);
             let res = await result.json();
             return res;   
         } catch (error) {

@@ -46,8 +46,8 @@ export default function DetTicketScreen({ route }) {
            <View style={styles.container}>
             {data.isLoading ? 
             <View style={styles.contentLoading}> 
-                <ActivityIndicator size='large' color='#FF7713'></ActivityIndicator>
-                <Text style={{marginVertical: 10, color: '#FF7713'}}>Loading messages...</Text>
+                <ActivityIndicator size='large' color='#4caf50'></ActivityIndicator>
+                <Text style={{marginVertical: 10, color: '#4caf50'}}>Loading messages...</Text>
             </View>
             :
             
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
         elevation: 1,
         //borderColor: 'gray',
         marginVertical: 5,
-        shadowColor: '#E0E0E0',
+        shadowColor: '#b3e5fc',
         shadowRadius: 3,
         shadowOffset: {
             width: 1,
@@ -124,11 +124,11 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.5,
         borderRadius: 3,
-        borderColor: '#E0E0E0',
+        borderColor: '#b3e5fc',
         borderWidth: 1,
     },
     itemtitle:{
-        backgroundColor: '#FFE0C7',
+        backgroundColor: '#b3e5fc',
         paddingVertical: 5,
         paddingHorizontal: 18,
         fontSize: 15,
