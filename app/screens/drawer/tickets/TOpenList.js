@@ -1,16 +1,13 @@
 import React, { useEffect } from 'react'
-import { Text, ActivityIndicator, StyleSheet, View, FlatList, ScrollView, Image, Alert } from 'react-native'
+import { Text, ActivityIndicator, StyleSheet, View, FlatList, Image, Alert } from 'react-native'
 import TicketsService from '../../../services/Tickets';
-import AsyncStorage from '@react-native-community/async-storage';
 import { List, Searchbar } from 'react-native-paper';
-import NewTicket from './NewTicket';
-import TicketsScreen from '../screens/TicketsScreen';
-import { CommonActions } from '@react-navigation/native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 export default function TicketsList() {
 
     const navigation = useNavigation();
+
     const [searchQuery, setSearchQuery] = React.useState('');
 
     const [data, setData] = React.useState({
@@ -22,16 +19,14 @@ export default function TicketsList() {
     const [page, setPage] = React.useState(0);
     const [loadingMore, setLoadingMore] = React.useState(false);
     const [loadingSearch, setLoadingSearch] = React.useState(false);
-    const ticket = 'myopen';
     const limit = 25;
-
+    const ticket = 'open';
      useEffect(() => {
          setLoadingMore(true)
          showTickets()
         
     }, []) 
 
-    //console.log('numero ',data.page)
      useEffect(() => {
         try {
             if(searchQuery===''){
@@ -73,7 +68,6 @@ export default function TicketsList() {
     const refreshList = () =>{
         setData({
             isLoading: true,
-            //data: data.data,
             refreshing: true
         }); 
         setPage(0)
@@ -86,8 +80,7 @@ export default function TicketsList() {
             setData({
                 isLoading: true
             })
-            showTickets()
-            setPage(0)
+            showTickets
             setSearchQuery('')
             setLoadingSearch(false)
           return () => {
@@ -102,22 +95,24 @@ export default function TicketsList() {
             loadingMore==true ?
             <View style={{marginBottom: 40, marginTop: 30}}>
                 <ActivityIndicator color='#4caf50' size='large'></ActivityIndicator>
-            </View>   
+            </View>
             : null
         )
     }
 
     const handleLoadMore = async() => {
+        //setPage(page+limit);
         setLoadingMore(true)
-        console.log(page+limit)
+        //setData({isLoading: true})
         try {
             let result = await TicketsService.getAllTicketForParameter(ticket,'', page+limit, limit);
-            setPage(page+limit)   
+            setPage(page+limit)
+            //setLoadingMore(true)
             setData({
                 isLoading: false,
                 data: data.data.concat(result.tickets),
                 refreshing: false
-            })                 
+            })            
         } catch (error) {
             console.log(error)
         }
@@ -147,31 +142,31 @@ export default function TicketsList() {
         }
         return year+'-'+month+'-'+day;
     }
+       
+     async function searchTickets(){
+         setData({isLoading:true})
+         setLoadingSearch(true)
+        try {
+            let result = await TicketsService.getAllTicketForParameter(searchQuery,'open', 0, limit); 
+            setData({
+                isLoading: false,
+                data: result.tickets,
+                refreshing: false
+            })
+            setLoadingMore(false)
+            setPage(0)
+            console.log(result.tickets)
+        } catch (error) {
+            
+        }
+    }
+    
 
-    async function searchTickets(){
-        setData({isLoading:true})
-        setLoadingSearch(true)
-       try {
-           let result = await TicketsService.getAllTicketForParameter(searchQuery,'open', 0, limit); 
-           setData({
-               isLoading: false,
-               data: result.tickets,
-               refreshing: false
-           })
-           setLoadingMore(false)
-           setPage(0)
-           console.log(result.tickets)
-       } catch (error) {
-           
-       }
-   }
-      
-    //newAdded()
         return (
            <View style={styles.container}>
             {data.isLoading ? 
                 <View style={styles.contentLoading}> 
-                    <Image resizeMode='center' source={loadingSearch==true ? 
+                   <Image resizeMode='center' source={loadingSearch==true ? 
                     require("../../../../assets/loadingDual.gif")
                     :
                     require("../../../../assets/loadingSpinnerGreen.gif")
@@ -198,27 +193,19 @@ export default function TicketsList() {
                     refreshing={data.refreshing} 
                     onRefresh={refreshList}
                     renderItem={({item}) => (
-                    <View style={(item.priority=='Emergencia' || item.priority=='Alta') ? 
-                                    styles.contentEmerg
-                                    :
-                                    styles.contentview
-                                    }>
-                        <View style={(item.priority=='Emergencia' || item.priority=='Alta') ? 
-                                    styles.itemNotEmerg
-                                    :
-                                    styles.itemtitle
-                                    }>
-                        <Text style={styles.t_number}>{item.ticket_number}</Text>
-                        <View style={styles.newContent}> 
-                                {item.priority=='Emergencia' ? 
+                    <View style={(item.priority==='Emergencia' || item.priority==='Alta') ? styles.contentEmerg : styles.contentview}>
+                        <View style={(item.priority==='Emergencia' || item.priority==='Alta') ? styles.itemNotEmerg : styles.itemtitle}>
+                            <Text style={styles.t_number}>{item.ticket_number}</Text>
+                            <View style={styles.newContent}> 
+                                {item.priority==='Emergencia' ? 
                                     <Text style={styles.emergency}>{item.priority}</Text>
                                     : 
                                     <View>
-                                        {item.priority=='Alta' ?
+                                        {item.priority==='Alta' ?
                                         <Text style={styles.priorityHig}>{item.priority}</Text>         
                                         :
                                         <View>
-                                            {item.priority=='Normal' ? 
+                                            {item.priority==='Normal' ? 
                                             <Text style={styles.qunatity}>{item.priority}</Text>
                                             :
                                             <Text style={styles.qunatity}>{item.priority}</Text>
@@ -227,13 +214,13 @@ export default function TicketsList() {
                                         }
                                     </View>
                                 }
-                        </View>
+                            </View>
                         </View>
                         <List.Item style={styles.listitem} title={item.subject} 
                         titleStyle={{color: '#7E7E7E', fontSize: 15, fontWeight: 'bold'}}
                         descriptionStyle={{fontSize: 12}}
                         description={'Creado - '+item.create_timestamp+'    Estado - '+item.ticket_status}
-                        onPress={() => navigation.navigate('TicketDetail', item)}
+                        onPress={() => navigation.navigate('TOpenDet', item)}
                         //left={props => <List.Icon {...props} icon="folder" />}
                         />
                     </View>
@@ -244,8 +231,10 @@ export default function TicketsList() {
                     >
                 </FlatList>
                 :
-                <Text style={{color: 'red', marginVertical: 10, fontWeight: 'bold'}}>No tienes tickets asignados</Text>
+                <Text style={{color: 'red', marginVertical: 10, fontWeight: 'bold'}}>
+                    No se encontro ningún ticket {searchQuery}</Text>
                 }
+                
             </View>
             }
             

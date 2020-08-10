@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { View, StyleSheet, Picker, Text, ActivityIndicator, Alert } from 'react-native'
+import { View, StyleSheet, Picker, Text, Image, Alert } from 'react-native'
 import { DataTable, ProgressBar, Colors } from 'react-native-paper';
 import DashboardService from '../../../services/Dashboard';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
-export default function DTickets({navigation}) {
+export default function DTHistory({navigation}) {
     
     function dateCurrent(){
         let date = new Date();
@@ -31,9 +31,6 @@ export default function DTickets({navigation}) {
         return yy;
     }
 
-    /* const date = dateCurrent();
-    const fullYearInPicker = addYearInPicker(); */
-
     let Listmonths = new Array("enero","febrero","marzo","abril","mayo","junio",
                         "julio","agosto","septiembre","octubre","noviembre","diciembre");
     let mm = new Date();
@@ -46,103 +43,75 @@ export default function DTickets({navigation}) {
 
     const [data, setData] = useState({
         open: '',
-        open_month: '',
         resolved: '',
-        total: '',
-        total_month: '',
-        reg_today: '',
-        closed_today: ''
+        registered: '',
+        emergency: '',
+        high: '',
+        normal: '',
+        low: ''
     });
 
     const [data_user, setDataUser] = useState({
         open: '',
-        open_month: '',
         resolved: '',
-        total: '',
-        total_month: '',
-        reg_today: '',
-        closed_today: ''
+        registered: '',
+        emergency: '',
+        high: '',
+        normal: '',
+        low: ''
     });
 
     const [data_other, setDataOther] = useState({
         open: '',
-        open_month: '',
         resolved: '',
-        total: '',
-        total_month: '',
-        reg_today: '',
-        closed_today: ''
+        registered: '',
+        emergency: '',
+        high: '',
+        normal: '',
+        low: ''
     });
 
     const [loading, setLoading] = useState(true);
+    const [loadingRefresh, setLoadingRefresh] = useState(false);
 
-    async function showMainTickets(mes, anio, apikey){
+    async function getHistoryTickets(mes, anio, apikey){
         try {
-            let result = await DashboardService.getAllDashboard(mes, anio, apikey);
+            let result = await DashboardService.getAllDTHistory(mes, anio);
             setData({
-                //...data,
                 open: result.t_open_tickets,
-                open_month: result.t_open_month,
                 resolved: result.t_resolved_tickets,
-                total: result.t_tickets,
-                total_month: result.t_tickets_month,
-                reg_today: result.t_registered_today,
-                closed_today: result.t_closed_today
+                registered: result.t_registered_tickets,
+                emergency: result.t_emergency_tickets,
+                high: result.t_high_tickets,
+                normal: result.t_normal_tickets,
+                low: result.t_low_tickets
             })
             setDataUser({
                 open: result.t_open_user,
-                open_month: result.t_open_month_user,
                 resolved: result.t_resolved_user,
-                total: result.t_user,
-                total_month: result.t_month_user,
-                reg_today: result.t_reg_today_user,
-                closed_today: result.t_closed_today_user
+                registered: result.t_registered_user,
+                emergency: result.t_emergency_user,
+                high: result.t_high_user,
+                normal: result.t_normal_user,
+                low: result.t_low_user
             });
             setDataOther({
-                open: result.t_open_others,
-                open_month: result.t_open_month_other,
-                resolved: result.t_resolved_others,
-                total: result.t_others,
-                total_month: result.t_month_others,
-                reg_today: result.t_reg_today_others,
-                closed_today: result.t_closed_today_others
+                open: result.t_open_other,
+                resolved: result.t_resolved_other,
+                registered: result.t_registered_other,
+                emergency: result.t_emergency_other,
+                high: result.t_high_other,
+                normal: result.t_normal_other,
+                low: result.t_low_other
             });
             setLoading(false)
+            setLoadingRefresh(false)
             //console.log(ticket)
         } catch (error) {
           console.log(error);  
         }   
     }
     
-    //no used....
-    async function showUserTickets(mes, anio, email, apikey){
-        try {
-            let result = await DashboardService.getAllDashboardForUser(mes, anio, email, apikey);
-            setDataUser({
-                open: result.t_open_user,
-                open_month: result.t_open_month_user,
-                resolved: result.t_resolved_user,
-                total: result.t_user,
-                total_month: result.t_month_user,
-                reg_today: result.t_reg_today_user,
-                closed_today: result.t_closed_today_user
-            });
-            setDataOther({
-                open: result.t_open_others,
-                open_month: result.t_open_month_other,
-                resolved: result.t_resolved_others,
-                total: result.t_others,
-                total_month: result.t_month_others,
-                reg_today: result.t_reg_today_others,
-                closed_today: result.t_closed_today_others
-            });
-            setLoading(false)
-            //console.log(result)
-        } catch (error) {
-          console.log(error);  
-        }   
-    }
-    //.........
 
     useEffect(()=>{
         if(selectDate.month != '' && selectDate.year != ''){
@@ -157,6 +126,11 @@ export default function DTickets({navigation}) {
           let isSuscribed = true;
           if(isSuscribed){
             refreshTable();
+            setLoadingRefresh(false)
+            setSelectDate({
+                year: year,
+                month: month
+            })
           }
           return () => isSuscribed = false;
         }, [])
@@ -164,41 +138,16 @@ export default function DTickets({navigation}) {
 
     useEffect(() => {
         let isSuscribed = true;
-        AsyncStorage.getItem('userToken')
-            .then(apikey => {
-                if(isSuscribed){
-                    showMainTickets(selectDate.month, selectDate.year, apikey);
-                }
-                /* AsyncStorage.getItem('email')
-                    .then(email => {
-                        if(isSuscribed){
-                            showUserTickets(selectDate.month, selectDate.year, email, apikey);
-                            console.log(selectDate.month);
-                        }
-                        
-                    }) */
-            })
-            .catch(err => {
-                console.log(err)
-            })
-
+            if(isSuscribed){
+                getHistoryTickets(selectDate.month, selectDate.year);
+            }
             return () => isSuscribed = false;
     }, []);
 
     function refreshTable(){
-        //console.log(selectDate.month)
         setLoading(true)
-            AsyncStorage.getItem('userToken')
-                .then(apikey => {
-                    showMainTickets(selectDate.month, selectDate.year, apikey);
-                    /* AsyncStorage.getItem('email')
-                        .then(email => {
-                            showUserTickets(selectDate.month, selectDate.year, email, apikey);
-                        }) */
-                })
-                .catch(err => {
-                    console.log(err);
-                })
+        setLoadingRefresh(true);
+        getHistoryTickets(selectDate.month, selectDate.year)   
     }
    
 
@@ -206,14 +155,14 @@ export default function DTickets({navigation}) {
         <View style={styles.container}>
             <View style={styles.contentHeader}>
                 <View style={styles.contentPickers}>
-                    <Text style={styles.titleDate}>Fecha</Text>
+                    {/* <Text style={styles.titleDate}>Fecha</Text> */}
                     <Text style={styles.titleMonth}>Mes</Text>
                     <Text style={styles.titleYear}>Año</Text>
                 </View>
                 <View style={styles.contentPickers}>
-                    <View style={{marginLeft: 5, width: 70}}>
+                    {/* <View style={{marginLeft: 5, width: 70}}>
                         <Text style={{color: '#474747'}}>{dateCurrent()}</Text>
-                    </View>
+                    </View> */}
                     <Picker itemStyle={styles.itemStyle}
                         prompt='Seleccione el mes'
                         selectedValue={selectDate.month}
@@ -256,8 +205,14 @@ export default function DTickets({navigation}) {
             </View>
             {loading == true ? 
             <View style={styles.contentLoading}> 
-                <ActivityIndicator size='large' color='#4caf50'></ActivityIndicator>
-                <Text style={{marginVertical: 10, color: '#4caf50'}}>Cargando...</Text>
+                <Image resizeMode='center' source={loadingRefresh==true ? 
+                require("../../../../assets/loadingDual.gif")
+                :
+                require("../../../../assets/loadingSpinnerGreen.gif")
+                }></Image>
+                <Text style={{marginTop: -5, color: '#4caf50'}}>
+                    {loadingRefresh==true ? 'Actualizando...' : 'Cargando Estadística...'}
+                </Text>
             </View>
             :
             <View>
@@ -270,52 +225,52 @@ export default function DTickets({navigation}) {
                 </DataTable.Header>
 
                 <DataTable.Row style={styles.tableRow}>
-                    <DataTable.Cell><Text style={styles.badgeOpen}>Tot. Abiertos</Text></DataTable.Cell>
+                    <DataTable.Cell><Text style={styles.badgeOpen}>T. Abiertos</Text></DataTable.Cell>
                     <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data.open}</Text></DataTable.Cell>
                     <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data_user.open}</Text></DataTable.Cell>
                     <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data_other.open}</Text></DataTable.Cell>
                 </DataTable.Row>
 
                 <DataTable.Row style={styles.tableRow}>
-                    <DataTable.Cell><Text style={styles.badgeOpen}>Tot. Abi. Mes</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data.open_month}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data_user.open_month}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data_other.open_month}</Text></DataTable.Cell>
-                </DataTable.Row>
-
-                <DataTable.Row style={styles.tableRowAtt}>
-                    <DataTable.Cell><Text style={styles.badgeAttended}>Tot. Att. Mes</Text></DataTable.Cell>
+                    <DataTable.Cell><Text style={styles.badgeAttended}>T. Atends.</Text></DataTable.Cell>
                     <DataTable.Cell numeric><Text style={styles.badgeAttended}>{data.resolved}</Text></DataTable.Cell>
                     <DataTable.Cell numeric><Text style={styles.badgeAttended}>{data_user.resolved}</Text></DataTable.Cell>
                     <DataTable.Cell numeric><Text style={styles.badgeAttended}>{data_other.resolved}</Text></DataTable.Cell>
                 </DataTable.Row>
 
+                <DataTable.Row style={styles.tableRowAtt}>
+                    <DataTable.Cell><Text style={styles.badgeTotal}>T. Regds.</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data.registered}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data_user.registered}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeTotal  }>{data_other.registered}</Text></DataTable.Cell>
+                </DataTable.Row>
+
                 <DataTable.Row style={styles.tableRowTotal}>
-                    <DataTable.Cell><Text style={styles.badgeTotal}>Total Tickets</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data.total}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data_user.total}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data_other.total}</Text></DataTable.Cell>
+                    <DataTable.Cell><Text style={styles.badgeClsToday}>T. Emerg.</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeClsToday}>{data.emergency}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeClsToday}>{data_user.emergency}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeClsToday}>{data_other.emergency}</Text></DataTable.Cell>
                 </DataTable.Row>
 
                 <DataTable.Row style={styles.tableRowMonth}>
-                    <DataTable.Cell><Text style={styles.badgeMonth}>Tot. Tks. Mes</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeMonth}>{data.total_month}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeMonth}>{data_user.total_month}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeMonth}>{data_other.total_month}</Text></DataTable.Cell>
+                    <DataTable.Cell><Text style={styles.badgeOpen}>T. P. Alta</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data.high}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data_user.high}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeOpen}>{data_other.high}</Text></DataTable.Cell>
                 </DataTable.Row>
 
                 <DataTable.Row style={styles.tableRowToday}>
-                    <DataTable.Cell><Text style={styles.badgeRegToday}>Tot. Reg. Hoy</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeRegToday}>{data.reg_today}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeRegToday}>{data_user.reg_today}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeRegToday}>{data_other.reg_today}</Text></DataTable.Cell>
+                    <DataTable.Cell><Text style={styles.badgeRegToday}>T. P. Normal</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeRegToday}>{data.normal}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeRegToday}>{data_user.normal}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeRegToday}>{data_other.normal}</Text></DataTable.Cell>
                 </DataTable.Row>
 
                 <DataTable.Row style={styles.tableRowClsToday}>
-                    <DataTable.Cell><Text style={styles.badgeClsToday}>Tot. Cds. Hoy</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeClsToday}>{data.closed_today}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeClsToday}>{data_user.closed_today}</Text></DataTable.Cell>
-                    <DataTable.Cell numeric><Text style={styles.badgeClsToday}>{data_other.closed_today}</Text></DataTable.Cell>
+                    <DataTable.Cell><Text style={styles.badgeTotal}>T. P. Baja</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data.low}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data_user.low}</Text></DataTable.Cell>
+                    <DataTable.Cell numeric><Text style={styles.badgeTotal}>{data_other.low}</Text></DataTable.Cell>
                 </DataTable.Row>
 
                 {/* <DataTable.Pagination
@@ -336,7 +291,8 @@ const styles = StyleSheet.create({
         flex: 1,
         //backgroundColor: '#009',
         width: '100%',
-        marginTop: 10
+        //marginTop: 10,
+        paddingHorizontal: 15
     },
     contentLoading: {
         flex: 1,
@@ -347,12 +303,20 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     contentHeader: {
-        marginBottom: 20
+        marginVertical: 15
+    },
+    contentPickerHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        shadowOpacity: 0.25,
     },
     contentPickers: {
         flexDirection: 'row',
         alignItems: 'center',
-        //justifyContent: 'space-between',
+        justifyContent: 'space-between',
         borderWidth: 1,
         borderColor: '#E0E0E0',
         shadowOpacity: 0.25,
@@ -368,15 +332,14 @@ const styles = StyleSheet.create({
         paddingVertical: 5, 
         color: '#474747',
         //: 'green', 
-        marginLeft: 10, 
-        width: 130,
+        textAlign: 'center',
+        width: '50%'
     },
     titleYear:{
         paddingVertical: 5, 
         color: '#474747',
-        //backgroundColor: 'red', 
-        marginHorizontal: 10, 
-        width: 65
+        textAlign: 'center',
+        width: '50%'
     },
     pickerMonth: {
         height: 50, 

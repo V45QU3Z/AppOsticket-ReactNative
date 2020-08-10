@@ -1,14 +1,11 @@
 import React from 'react'
 import {Text, Modal,ActivityIndicator, TextInput, View, StyleSheet, TouchableOpacity, Image, Alert, Dimensions } from 'react-native'
-import {Card, Button, Snackbar} from 'react-native-paper';
+import {Card, Button, Snackbar, RadioButton} from 'react-native-paper';
 import {Feather, AntDesign, FontAwesome, FontAwesome5} from 'react-native-vector-icons';
 import { AuthContext } from '../../context';
 import User from '../../models/users';
 import AuthService from '../../services/Auth';
-import SplashScreen from '../../components/SplashScreen';
-import { color } from 'react-native-reanimated';
-import SnackBar from '../../components/SnackBar';
-import { SnackBarr } from '../../components/SnackBarr';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default function Login() {
     const [visible, setVisible] = React.useState({
@@ -19,6 +16,8 @@ export default function Login() {
     const _onDismissSnackBar = () => setVisible({snack: false});
     
     const [modalVisible, setModalVisible] = React.useState(false);
+    const [checked, setChecked] = React.useState('user');
+
 
     const [data, setData] = React.useState({
         username: '',
@@ -26,6 +25,9 @@ export default function Login() {
         checkInputChange: false,
         securePassEntry: true
     });
+
+    const [email, setEmail] = React.useState('');
+    const [pass, setPass] = React.useState('');
 
     //use conext
     const { signIn } = React.useContext(AuthContext);
@@ -68,39 +70,39 @@ export default function Login() {
         })
     }
 
-    const login =async(username, password)=>{
+    const login =async()=>{
         let us=new User(); 
-        if(username.length == 0 && password.length == 0){
+        if(email.length == 0 && pass.length == 0){
             return (
                 isValidate()
                 //setModalVisible(true)
             );
         }
-        let user = await AuthService.signIn(username, password);
-        console.log(user)
+        let user = await AuthService.signIn(email, pass, checked);
+        console.log(user.status)
+        console.log(user.role)
+
         if(!user){
             return(
                 isValidate()
             )
-        }if(username==user.email && password==password){
+        }
+
+        if(user.status===true){
             setModalVisible(true)
             setTimeout(() => {
                 signIn(user);
-            }, 3000)
+            }, 4000)
             //console.log(user);
         }else{
-            return(
-                isValidate()
-            )
-        }
-       
+            return(isValidate() )
+        }  
     }
 
     const init = () =>{
-        login(data.username, data.password);
+        login();
     }
     
-
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -112,13 +114,11 @@ export default function Login() {
             </View>
             <View style={styles.main}>
                 <View style={styles.action}>
-                    <FontAwesome
-                        name='user-circle' color='#006' size={25}/>
-                    <TextInput placeholder='Email' style={styles.textInput}
-                        autoCapitalize='none'onChangeText={(val)=> textInputChange(val)}
+                    <FontAwesome name='user-circle' color='#006' size={25}/>
+                    <TextInput placeholder='Usuario / Correo Electrónico' style={styles.textInput}
+                        autoCapitalize='none'onChangeText={(val)=> setEmail(val)}
                     ></TextInput>
-
-                    {data.check_TextInputChange ?
+                    {email.match('@') ?
                     <Feather name='check' color='green' size={20}/>
                     : 
                     <FontAwesome name='exclamation-circle' color='gray' size={20}/>
@@ -127,10 +127,10 @@ export default function Login() {
 
                 <View style={styles.action}>
                     <FontAwesome5 name='lock' color='#006' size={25}/>
-                    <TextInput placeholder='Password' 
+                    <TextInput placeholder='Contraseña' 
                         secureTextEntry={data.securePassEntry ? true : false}
                         style={styles.textInput} autoCapitalize='none'
-                        onChangeText={(val)=> passwdInputChange(val)}
+                        onChangeText={(val)=> setPass(val)}
                     ></TextInput>
                     <TouchableOpacity onPress={updateSecureEntryPasswd} >
                         {data.securePassEntry ?
@@ -140,10 +140,27 @@ export default function Login() {
                         }
                     </TouchableOpacity>
                 </View>
+                
+                <View style={styles.radioButton}>
+                <RadioButton
+                    value="user"
+                    status={ checked === 'user' ? 'checked' : 'unchecked' }
+                    onPress={() => setChecked('user')}
+                    color='#0277bd' uncheckedColor='#76BDE7'
+                    />
+                    <Text>Usuario</Text>
+                <RadioButton 
+                    value="staff"
+                    status={ checked === 'staff' ? 'checked' : 'unchecked' }
+                    onPress={() => setChecked('staff')}
+                    color='#0277bd' uncheckedColor='#76BDE7'
+                />
+                <Text>Agente</Text>
+                </View>
 
                 <View style={styles.actionContent}>
                     <Button style={styles.btnSingIn} mode="contained" 
-                    loading={visible.loading} onPress={init}>Sign In</Button>
+                    loading={visible.loading} onPress={init}>INICIAR SESIÓN</Button>
                 </View>
                 
             </View>
@@ -162,7 +179,7 @@ export default function Login() {
                 }}
             >
           <Text style={{color: '#E31500', fontWeight: 'bold'}}>
-              Email or Password is Invalid! </Text>
+              Credenciales Incorrectas! </Text>
         </Snackbar>
             {/* <View style={styles.footer}>
 
@@ -176,8 +193,8 @@ export default function Login() {
                     Alert.alert("Modal has been closed.");}}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <ActivityIndicator size='large' color='#fff'></ActivityIndicator>
-                            <Text style={styles.please}>Please wait...</Text>
+                        <Image resizeMode='center' source={require("../../../assets/loadingSpinWhite.gif")}></Image>
+                            <Text style={styles.please}>Por favor espere...</Text>
                         </View>
                     </View>
                 </Modal>
@@ -237,6 +254,16 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         paddingHorizontal: 5
         //borderBottomColor: 'FF7713'
+    },
+    radioButton:{
+        flexDirection: 'row',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 10,
+        minWidth: 300,
+        paddingHorizontal: 5,
+        height: 50
     },
     actionContent:{
         flexDirection: 'row',
@@ -298,7 +325,7 @@ const styles = StyleSheet.create({
         borderColor: '#01579b'
       },
       please: {
-          marginVertical: 10,
+          marginTop: -10,
           color: '#fff'
       },
       

@@ -12,14 +12,16 @@ export default function DrawerContent(props) {
 
   const { signOut } = React.useContext(AuthContext);
 
+  const [role, setRole] = React.useState('');
+
   function Logout() {
     return(
-      Alert.alert("Logout","You want to log out?",[{
-        text: "CANCEL",
+      Alert.alert("Cerrar Sesión","¿Desea cerrar sesión?",[{
+        text: "NO",
         onPress: () => console.log("Cancel Pressed"),
         style: "cancel"
       },
-      { text: "EXIT", onPress: () => {signOut()} }],
+      { text: "SI", onPress: () => {signOut()} }],
       { cancelable: false }
     )
     )
@@ -27,7 +29,7 @@ export default function DrawerContent(props) {
 
   function Setting() {
     return(
-      Alert.alert("Settings","Not available",[{
+      Alert.alert("Configuracion","No disponible",[{
         text: "CLOSE",
         onPress: () => console.log("Cancel Pressed")
       }]
@@ -55,6 +57,10 @@ export default function DrawerContent(props) {
   }
   const info_user = showProfile();
 
+  AsyncStorage.getItem('rol').then(res => {
+    setRole(res);
+  })
+
     return (
         <View style={{flex:1}}>
             <DrawerContentScrollView {...props}>
@@ -81,29 +87,64 @@ export default function DrawerContent(props) {
                     </View> */}
                 </View>
 
+                {role==='staff' ?
+                  <Drawer.Section style={styles.drawerSection}>
+                    <DrawerItem 
+                      icon={({color, size}) => (
+                        <Icon name="chart-bar" color='#0277bd' size={size}/>
+                      )}
+                      label="Estadística" labelStyle={{color:'#0277bd'}}
+                      onPress={() => {props.navigation.navigate('Home')}}
+                  />
+                  <DrawerItem 
+                    icon={({color, size}) => (
+                        <Icon name="open-in-app" color='#0277bd' size={size}/>
+                    )}
+                    label="Tickets Abiertos" labelStyle={{color:'#0277bd'}}
+                    onPress={() => {props.navigation.navigate('TOpen')}}
+                  />
+                  <DrawerItem 
+                    icon={({color, size}) => (
+                        <Icon name="ticket-account" color='#0277bd' size={size}/>
+                    )}
+                    label="Mis Tickets" labelStyle={{color:'#0277bd'}}
+                    onPress={() => {props.navigation.navigate('Tickets')}}
+                  />
+                  <DrawerItem 
+                    icon={({color, size}) => (
+                        <Icon name="lock" color='#0277bd' size={size}/>
+                    )}
+                    label="Tickets Cerrados" labelStyle={{color:'#0277bd'}}
+                    onPress={() => {props.navigation.navigate('TClosed')}}
+                  />
+                  <DrawerItem 
+                    icon={({color, size}) => (
+                        <Icon name="note-plus" color='#0277bd' size={size}/>
+                    )}
+                    label="Nuevo Ticket" labelStyle={{color:'#0277bd'}}
+                    onPress={() => {props.navigation.navigate('NewTicket')}}
+                  />
+                  <DrawerItem 
+                    icon={({color, size}) => (
+                        <Icon name="settings" color='#0277bd' size={size}/>
+                    )}
+                    label="Configuración" labelStyle={{color:'#0277bd'}}
+                    onPress={() => {Setting()}}
+                  />
+                </Drawer.Section>
+                :
+                role==='user' ?
                 <Drawer.Section style={styles.drawerSection}>
-                        <DrawerItem 
-                            icon={({color, size}) => (
-                                <Icon name="home-outline" color='#0277bd' size={size}/>
-                            )}
-                            label="Home" labelStyle={{color:'#0277bd'}}
-                            onPress={() => {props.navigation.navigate('Home')}}
-                        />
-                        <DrawerItem 
-                            icon={({color, size}) => (
-                                <Icon name="ticket" color='#0277bd' size={size}/>
-                            )}
-                            label="Tickets" labelStyle={{color:'#0277bd'}}
-                            onPress={() => {props.navigation.navigate('Tickets')}}
-                        />
-                        <DrawerItem 
-                            icon={({color, size}) => (
-                                <Icon name="settings" color='#0277bd' size={size}/>
-                            )}
-                            label="Settings" labelStyle={{color:'#0277bd'}}
-                            onPress={() => {Setting()}}
-                        />
-                    </Drawer.Section>
+                    <DrawerItem 
+                        icon={({color, size}) => (
+                        <Icon name="note-plus" color='#0277bd' size={size}/>
+                        )}
+                        label="Nuevo Ticket" labelStyle={{color:'#0277bd'}}
+                        onPress={() => {props.navigation.navigate('NewTicket')}}
+                    />
+                  </Drawer.Section>:null
+                }
+
 
             </DrawerContentScrollView>
 
@@ -112,7 +153,7 @@ export default function DrawerContent(props) {
                     icon={({color, size}) => (
                     <FontAwesome5 name="power-off" color='#0277bd' size={size}></FontAwesome5>
                     )}
-                    label='Sign Out' labelStyle={{color:'#0277bd'}} onPress={() => {Logout()}}
+                    label='Cerrar Sesión' labelStyle={{color:'#0277bd'}} onPress={() => {Logout()}}
                 >
                 </DrawerItem>
             </Drawer.Section>

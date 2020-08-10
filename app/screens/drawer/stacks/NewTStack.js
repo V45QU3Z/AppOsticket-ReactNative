@@ -1,12 +1,12 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/HomeScreen';
+import NewTScreen from '../screens/NewTScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const HomeStack = createStackNavigator();
 const DetailsStack = createStackNavigator();
 
-export default function HomesStack({navigation}){
+export default function NewTStack({navigation}){
     return(
         <HomeStack.Navigator screenOptions={{
             headerStyle: {
@@ -14,8 +14,8 @@ export default function HomesStack({navigation}){
                 headerTintColor: '#fff'
                 }
             }}>
-            <HomeStack.Screen name="Home" component={HomeScreen} options={{
-                title: 'Estadística',
+            <HomeStack.Screen name="NewTicket" component={NewTScreen} options={{
+                title: 'Nuevo Ticket',
                 headerTintColor: '#fff',
                 headerLeft: () => (
                     <Icon.Button name="ios-menu" size={30} backgroundColor="#0277bd"

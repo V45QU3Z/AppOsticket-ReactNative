@@ -10,7 +10,9 @@ import { AuthContext } from '../../../context';
 import User from '../../../models/users';
 import RootStack from '../stacks/RootStack';
 import AsyncStorage from '@react-native-community/async-storage';
-import DetTicketStack from '../stacks/DetTicketStack';
+import TOpenStack from '../stacks/TOpenStack';
+import TClosedStack from '../stacks/TClosedStack';
+import NewTStack from '../stacks/NewTStack';
 
 const HomeStack = createStackNavigator();
 const DetailsStack = createStackNavigator();
@@ -56,7 +58,8 @@ export default function Navigation(){
       };
 
       const [loginState, dispatch] = React.useReducer(loginReducer, initialLoginState);
-      
+      const [role, setRole] = React.useState('');
+
       const authContext = React.useMemo(() => ({
         signIn: async(user) => {
           //let userToken=null;
@@ -64,23 +67,27 @@ export default function Navigation(){
           const email = String(user.email);
           const name = String(user.name);
           const username = String(user.username);
+          const rol = String(user.role);
           try {
             await AsyncStorage.setItem('name', name);
             await AsyncStorage.setItem('email', email);
             await AsyncStorage.setItem('username', username);
             await AsyncStorage.setItem('userToken', userToken);
+            await AsyncStorage.setItem('rol', rol);
           } catch(e) {
             console.log(e);
           } 
-          dispatch({ type: 'LOGIN', email: email, name: name, username: username, token: userToken });
+          dispatch({ type: 'LOGIN', email: email, name: name, username: username, token: userToken, rol: rol});
           console.log('token: ', userToken);
           console.log('name: ', name);
-          console.log('status: ', true)
+          console.log('status: ', user.status);
+          console.log('El rol es '+ rol)
         },
 
         signOut: async() => {
           try {
             await AsyncStorage.removeItem('userToken');
+            await AsyncStorage.removeItem('rol');
           } catch(e) {
             console.log(e);
           }
@@ -96,10 +103,11 @@ export default function Navigation(){
     useEffect(() => {
         setTimeout(async() => {
           // setIsLoading(false);
-          let userToken;
-          userToken = null;
+          let userToken; let userRole;
+          userToken = null; userRole = null;
           try {
             userToken = await AsyncStorage.getItem('userToken');
+            userRole = await AsyncStorage.getItem('rol');
           } catch(e) {
             console.log(e);
           }
@@ -108,6 +116,9 @@ export default function Navigation(){
         }, 1000);
       }, []);
 
+    AsyncStorage.getItem('rol').then(res => {
+      setRole(res);
+    })
     if( loginState.isloading ) {
     return(
       <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
@@ -119,15 +130,22 @@ export default function Navigation(){
     return(
         <AuthContext.Provider value={authContext}>
             <NavigationContainer>
-                {loginState.userToken !== null ? (
+                {(loginState.userToken !== null && role==='staff') ? 
                     <Drawer.Navigator drawerContent={props => <DrawerContent {...props}></DrawerContent>}>
                         <Drawer.Screen name="Home" component={HomesStack} />
                         <Drawer.Screen name="Tickets" component={TicketsStack} />
-                        <Drawer.Screen name="TicketDetail" component={DetTicketStack} /> 
+                        <Drawer.Screen name="TOpen" component={TOpenStack} /> 
+                        <Drawer.Screen name="TClosed" component={TClosedStack} /> 
+                        <Drawer.Screen name="NewTicket" component={NewTStack} /> 
                     </Drawer.Navigator>
-                )
                 :
-                <RootStack/>                }
+                (loginState.userToken !== null && role==='user') ?
+                <Drawer.Navigator drawerContent={props => <DrawerContent {...props}></DrawerContent>}>
+                    <Drawer.Screen name="NewTicket" component={NewTStack} /> 
+                </Drawer.Navigator>
+                  :                      
+                  <RootStack/> 
+                }
             </NavigationContainer>
         </AuthContext.Provider>
     );

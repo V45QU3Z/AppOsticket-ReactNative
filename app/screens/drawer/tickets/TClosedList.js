@@ -1,14 +1,11 @@
 import React, { useEffect } from 'react'
-import { Text, ActivityIndicator, StyleSheet, View, FlatList, ScrollView, Image, Alert } from 'react-native'
+import { Text, ActivityIndicator, StyleSheet, View, FlatList, ScrollView, Image } from 'react-native'
 import TicketsService from '../../../services/Tickets';
-import AsyncStorage from '@react-native-community/async-storage';
 import { List, Searchbar } from 'react-native-paper';
-import NewTicket from './NewTicket';
-import TicketsScreen from '../screens/TicketsScreen';
-import { CommonActions } from '@react-navigation/native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { color } from 'react-native-reanimated';
 
-export default function TicketsList() {
+export default function TClosedList() {
 
     const navigation = useNavigation();
     const [searchQuery, setSearchQuery] = React.useState('');
@@ -22,16 +19,14 @@ export default function TicketsList() {
     const [page, setPage] = React.useState(0);
     const [loadingMore, setLoadingMore] = React.useState(false);
     const [loadingSearch, setLoadingSearch] = React.useState(false);
-    const ticket = 'myopen';
     const limit = 25;
-
+    const ticket = 'closed';
      useEffect(() => {
          setLoadingMore(true)
          showTickets()
         
     }, []) 
 
-    //console.log('numero ',data.page)
      useEffect(() => {
         try {
             if(searchQuery===''){
@@ -86,8 +81,7 @@ export default function TicketsList() {
             setData({
                 isLoading: true
             })
-            showTickets()
-            setPage(0)
+            showTickets
             setSearchQuery('')
             setLoadingSearch(false)
           return () => {
@@ -102,22 +96,25 @@ export default function TicketsList() {
             loadingMore==true ?
             <View style={{marginBottom: 40, marginTop: 30}}>
                 <ActivityIndicator color='#4caf50' size='large'></ActivityIndicator>
-            </View>   
+            </View>
+            
             : null
         )
     }
 
     const handleLoadMore = async() => {
         setLoadingMore(true)
+        //setData({isLoading: true})
         console.log(page+limit)
         try {
             let result = await TicketsService.getAllTicketForParameter(ticket,'', page+limit, limit);
-            setPage(page+limit)   
+            setPage(page+limit)
+            setLoadingMore(true)
             setData({
                 isLoading: false,
                 data: data.data.concat(result.tickets),
                 refreshing: false
-            })                 
+            })            
         } catch (error) {
             console.log(error)
         }
@@ -148,11 +145,11 @@ export default function TicketsList() {
         return year+'-'+month+'-'+day;
     }
 
-    async function searchTickets(){
+    async function searchTicketClosed(){
         setData({isLoading:true})
         setLoadingSearch(true)
        try {
-           let result = await TicketsService.getAllTicketForParameter(searchQuery,'open', 0, limit); 
+           let result = await TicketsService.getAllTicketForParameter(searchQuery,'closed', 0, limit); 
            setData({
                isLoading: false,
                data: result.tickets,
@@ -165,8 +162,10 @@ export default function TicketsList() {
            
        }
    }
-      
+       
+    
     //newAdded()
+
         return (
            <View style={styles.container}>
             {data.isLoading ? 
@@ -188,64 +187,42 @@ export default function TicketsList() {
                     onChangeText={(value) => {setSearchQuery(value)}}
                     value={searchQuery}
                     style={{marginTop: 25, width: '95%'}}
-                    onBlur={searchTickets}
-                    onIconPress={searchTickets}
+                    onBlur={searchTicketClosed}
+                    onIconPress={searchTicketClosed}
                     iconColor='#0277bd' 
                     placeholderTextColor='#76BDE7'
                 />
                 {data.data !== undefined ?
-                    <FlatList style={styles.flatlist} data={data.data} extraData={data} 
-                    refreshing={data.refreshing} 
-                    onRefresh={refreshList}
-                    renderItem={({item}) => (
-                    <View style={(item.priority=='Emergencia' || item.priority=='Alta') ? 
-                                    styles.contentEmerg
-                                    :
-                                    styles.contentview
-                                    }>
-                        <View style={(item.priority=='Emergencia' || item.priority=='Alta') ? 
-                                    styles.itemNotEmerg
-                                    :
-                                    styles.itemtitle
-                                    }>
+                <FlatList style={styles.flatlist} data={data.data} extraData={data} 
+                refreshing={data.refreshing} 
+                onRefresh={refreshList}
+                renderItem={({item}) => (
+                <View style={styles.contentview}>
+                    <View style={styles.itemtitle}>
                         <Text style={styles.t_number}>{item.ticket_number}</Text>
                         <View style={styles.newContent}> 
-                                {item.priority=='Emergencia' ? 
-                                    <Text style={styles.emergency}>{item.priority}</Text>
-                                    : 
-                                    <View>
-                                        {item.priority=='Alta' ?
-                                        <Text style={styles.priorityHig}>{item.priority}</Text>         
-                                        :
-                                        <View>
-                                            {item.priority=='Normal' ? 
-                                            <Text style={styles.qunatity}>{item.priority}</Text>
-                                            :
-                                            <Text style={styles.qunatity}>{item.priority}</Text>
-                                            }
-                                        </View>
-                                        }
-                                    </View>
-                                }
+                            { <Text style={styles.qunatity}>{item.thread_entries.length}</Text>}
                         </View>
-                        </View>
-                        <List.Item style={styles.listitem} title={item.subject} 
-                        titleStyle={{color: '#7E7E7E', fontSize: 15, fontWeight: 'bold'}}
-                        descriptionStyle={{fontSize: 12}}
-                        description={'Creado - '+item.create_timestamp+'    Estado - '+item.ticket_status}
-                        onPress={() => navigation.navigate('TicketDetail', item)}
-                        //left={props => <List.Icon {...props} icon="folder" />}
-                        />
                     </View>
-                    )} keyExtractor={(item, index) => index.toString()}
-                    onEndReached={(page+limit) > data.data.length ? finishedTickets : handleLoadMore}
-                    onEndReachedThreshold={0.3}
-                    ListFooterComponent={renderFooter} 
-                    >
-                </FlatList>
+                    <List.Item style={styles.listitem} title={item.subject} 
+                    titleStyle={{color: '#7E7E7E', fontSize: 15, fontWeight: 'bold'}}
+                    descriptionStyle={{fontSize: 12}}
+                    description={'Creado - '+item.create_timestamp+'    Estado - '+item.ticket_status}
+                    onPress={() => navigation.navigate('TClosedDet', item)}
+                    //left={props => <List.Icon {...props} icon="folder" />}
+                    />
+                </View>
+                )} keyExtractor={(item, index) => index.toString()}
+                onEndReached={(page+limit) > data.data.length ? finishedTickets : handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={renderFooter}
+                >
+            </FlatList>
                 :
-                <Text style={{color: 'red', marginVertical: 10, fontWeight: 'bold'}}>No tienes tickets asignados</Text>
+                <Text style={{color: 'red', marginVertical: 10, fontWeight: 'bold'}}>
+                    No se encontro ningún ticket {searchQuery}</Text>
                 }
+                {/* </ScrollView> */}
             </View>
             }
             
@@ -261,7 +238,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingBottom: 10,
-        //marginBottom: 20
+        
     },
     contentLoading: {
         display: 'flex',
@@ -271,7 +248,6 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     flatlist: {
-        //flex: 1,
         paddingHorizontal: 10,
         paddingVertical: 10,
         //backgroundColor: 'green',
@@ -282,7 +258,7 @@ const styles = StyleSheet.create({
     contentview: {
         elevation: 1,
         //borderColor: 'gray',
-        //marginVertical: 5,
+        marginBottom: 10,
         shadowColor: '#b3e5fc',
         shadowRadius: 3,
         shadowOffset: {
@@ -292,21 +268,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5,
         borderRadius: 3,
         borderColor: '#b3e5fc',
-        borderWidth: 1,
-        marginBottom: 10
-    },
-    contentEmerg:{
-        elevation: 1,
-        marginVertical: 5,
-        shadowColor: '#FFCDD2',
-        shadowRadius: 3,
-        shadowOffset: {
-            width: 1,
-            height: 1
-        },
-        shadowOpacity: 0.5,
-        borderRadius: 3,
-        borderColor: '#FFCDD2',
         borderWidth: 1,
     },
     itemtitle:{
@@ -348,33 +309,11 @@ const styles = StyleSheet.create({
     qunatity: {
         backgroundColor: '#0277bd',
         color: '#fff',
-        borderRadius: 3,
-        fontSize: 12,
-        /* width: 45, */
+        borderRadius: 100,
+        width: 20,
+        height: 20,
         textAlign: 'center',
-        paddingHorizontal: 4,
-        paddingVertical: 3,
-        fontWeight: 'bold',
-    },
-    emergency: {
-        backgroundColor: '#E94343',
-        color: '#fff',
-        borderRadius: 3,
-        fontSize: 12,
-        paddingHorizontal: 4,
-        paddingVertical: 3,
-        fontWeight: 'bold',
-    },
-    priorityHig: {
-        backgroundColor: '#FF841D',
-        color: '#fff',
-        borderRadius: 3,
-        fontSize: 12,
-        width: 45,
-        paddingHorizontal: 4,
-        paddingVertical: 3,
-        fontWeight: 'bold',
-        textAlign: 'center'
+        fontWeight: 'bold'
     },
     listitem: {
         //backgroundColor: 'gray',
