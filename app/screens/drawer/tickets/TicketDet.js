@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Text, ActivityIndicator, StyleSheet, View, FlatList, Image} from 'react-native'
-import TicketsService from '../../../services/Tickets';
+import TicketsService from '../../../services/TicketsService';
 import { List, Button } from 'react-native-paper';
 import HTMLView from 'react-native-htmlview';
 

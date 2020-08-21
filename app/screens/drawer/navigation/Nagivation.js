@@ -88,6 +88,9 @@ export default function Navigation(){
           try {
             await AsyncStorage.removeItem('userToken');
             await AsyncStorage.removeItem('rol');
+            await AsyncStorage.removeItem('name');
+            await AsyncStorage.removeItem('email');
+            await AsyncStorage.removeItem('username');
           } catch(e) {
             console.log(e);
           }

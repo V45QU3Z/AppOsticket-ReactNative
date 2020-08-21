@@ -7,9 +7,9 @@
       "android",
       "web"
     ],
-    "version": "1.0.2",
+    "version": "1.1.2",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon.jpg",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -22,11 +22,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.support.osticket"
     },
     "android": {
       "package": "com.support.osticket",
-      "versionCode": 5,
+      "versionCode": 7,
       "adaptiveIcon": {
         "backgroundColor": "#FF9800",
         "foregroundImage": "./assets/icon.png"

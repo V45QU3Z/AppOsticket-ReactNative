@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { View, StyleSheet, Picker, Text, Image, Alert } from 'react-native'
 import { DataTable, ProgressBar, Colors } from 'react-native-paper';
-import DashboardService from '../../../services/Dashboard';
+import DashboardService from '../../../services/DashboardService';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -74,7 +74,7 @@ export default function DTHistory({navigation}) {
     const [loading, setLoading] = useState(true);
     const [loadingRefresh, setLoadingRefresh] = useState(false);
 
-    async function getHistoryTickets(mes, anio, apikey){
+    async function getHistoryTickets(mes, anio){
         try {
             let result = await DashboardService.getAllDTHistory(mes, anio);
             setData({

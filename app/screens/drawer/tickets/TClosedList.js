@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Text, ActivityIndicator, StyleSheet, View, FlatList, ScrollView, Image } from 'react-native'
-import TicketsService from '../../../services/Tickets';
+import TicketsService from '../../../services/TicketsService';
 import { List, Searchbar } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { color } from 'react-native-reanimated';
@@ -219,8 +219,11 @@ export default function TClosedList() {
                 >
             </FlatList>
                 :
-                <Text style={{color: 'red', marginVertical: 10, fontWeight: 'bold'}}>
-                    No se encontro ningún ticket {searchQuery}</Text>
+                <View style={{flex: 1, alignItems: 'center'}}>
+                    <Image resizeMode='center' source={require("../../../../assets/404.png")}></Image>
+                    <Text style={{color: 'gray', marginTop: -25, fontWeight: 'bold', fontSize: 18}}>
+                        No se ha encontrado ningún ticket... {searchQuery}</Text>
+                </View>
                 }
                 {/* </ScrollView> */}
             </View>

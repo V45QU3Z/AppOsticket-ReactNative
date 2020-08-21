@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Text, ActivityIndicator, StyleSheet, View, FlatList, ScrollView, Image, Alert } from 'react-native'
-import TicketsService from '../../../services/Tickets';
+import TicketsService from '../../../services/TicketsService';
 import AsyncStorage from '@react-native-community/async-storage';
 import { List, Searchbar } from 'react-native-paper';
 import NewTicket from './NewTicket';
@@ -244,7 +244,11 @@ export default function TicketsList() {
                     >
                 </FlatList>
                 :
-                <Text style={{color: 'red', marginVertical: 10, fontWeight: 'bold'}}>No tienes tickets asignados</Text>
+                <View style={{flex: 1, alignItems: 'center'}}>
+                    <Image resizeMode='center' source={require("../../../../assets/404.png")}></Image>
+                    <Text style={{color: 'gray', marginTop: -25, fontWeight: 'bold', fontSize: 18}}>
+                        No se ha encontrado ningún ticket... {searchQuery}</Text>
+                </View>
                 }
             </View>
             }
@@ -297,7 +301,6 @@ const styles = StyleSheet.create({
     },
     contentEmerg:{
         elevation: 1,
-        marginVertical: 5,
         shadowColor: '#FFCDD2',
         shadowRadius: 3,
         shadowOffset: {
@@ -308,6 +311,7 @@ const styles = StyleSheet.create({
         borderRadius: 3,
         borderColor: '#FFCDD2',
         borderWidth: 1,
+        marginBottom: 10
     },
     itemtitle:{
         backgroundColor: '#b3e5fc',

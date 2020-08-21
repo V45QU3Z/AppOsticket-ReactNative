@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { View, StyleSheet, Picker, Text, ActivityIndicator, Alert } from 'react-native'
 import { DataTable, ProgressBar, Colors } from 'react-native-paper';
-import DashboardService from '../../../services/Dashboard';
+import DashboardService from '../../../services/DashboardService';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 

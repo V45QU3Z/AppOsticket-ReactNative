@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { View, StyleSheet, Picker, Text, ActivityIndicator, Image } from 'react-native'
 import { DataTable, ProgressBar, Colors } from 'react-native-paper';
-import DashboardService from '../../../services/Dashboard';
+import DashboardService from '../../../services/DashboardService';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { List } from 'react-native-paper';
@@ -56,7 +56,7 @@ export default function DTOnline({navigation}) {
 
     const [loading, setLoading] = useState(true);
 
-    async function getOnlineTickets(mes, anio, apikey){
+    async function getOnlineTickets(){
         try {
             let result = await DashboardService.getAllDTOnline();
             setData({

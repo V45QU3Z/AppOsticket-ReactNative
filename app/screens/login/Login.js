@@ -4,7 +4,7 @@ import {Card, Button, Snackbar, RadioButton} from 'react-native-paper';
 import {Feather, AntDesign, FontAwesome, FontAwesome5} from 'react-native-vector-icons';
 import { AuthContext } from '../../context';
 import User from '../../models/users';
-import AuthService from '../../services/Auth';
+import AuthService from '../../services/AuthService';
 import AsyncStorage from '@react-native-community/async-storage';
 
 export default function Login() {
@@ -80,7 +80,7 @@ export default function Login() {
         }
         let user = await AuthService.signIn(email, pass, checked);
         console.log(user.status)
-        console.log(user.role)
+        //console.log(user.role)
 
         if(!user){
             return(
@@ -92,7 +92,7 @@ export default function Login() {
             setModalVisible(true)
             setTimeout(() => {
                 signIn(user);
-            }, 4000)
+            }, 3000)
             //console.log(user);
         }else{
             return(isValidate() )

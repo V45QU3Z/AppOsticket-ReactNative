@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Button, StyleSheet, View, ImageBackground, Alert, ActivityIndicator } from 'react-native';
+import { Button, StyleSheet, View, ImageBackground, Alert, Image } from 'react-native';
 import { createDrawerNavigator, DrawerItem, DrawerContentScrollView } from '@react-navigation/drawer';
 import { Caption, Avatar, Title, Paragraph, Drawer, Text, TouchableRipple, Switch, Card} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -13,7 +13,7 @@ export default function DrawerContent(props) {
   const { signOut } = React.useContext(AuthContext);
 
   const [role, setRole] = React.useState('');
-
+  
   function Logout() {
     return(
       Alert.alert("Cerrar Sesión","¿Desea cerrar sesión?",[{
@@ -29,8 +29,8 @@ export default function DrawerContent(props) {
 
   function Setting() {
     return(
-      Alert.alert("Configuracion","No disponible",[{
-        text: "CLOSE",
+      Alert.alert("Configuración","No disponible",[{
+        text: "CERRAR",
         onPress: () => console.log("Cancel Pressed")
       }]
     ))
@@ -68,7 +68,7 @@ export default function DrawerContent(props) {
                     <View style={styles.userInfoSection}>
                         <View style={{flexDirection:'column', marginTop: 0}}>
                         <Card style={{backgroundColor: '#ff9800'}}>
-                            <Card.Cover style={styles.img} source={{ uri: 'https://picsum.photos/700' }} />
+                            <Card.Cover style={styles.img} source={{uri:"https://images5.alphacoders.com/479/479102.jpg"}} />
                             <Text style={styles.textName} >{info_user.name}</Text>
                             <Text style={styles.textEmail} >{info_user.email}</Text>
                         </Card>
@@ -180,7 +180,8 @@ const styles = StyleSheet.create({
       lineHeight: 14,
     },
     img:{
-      opacity: 0.9
+      opacity: 0.9,
+      backgroundColor: '#0277bd'
     },
     textName:{
       position: 'absolute',

@@ -46,8 +46,8 @@ export default class TicketService {
                                     'X-API-Key': apikey
                             }, body: JSON.stringify(tickets)
                         });
-            //let ticket = await result.json();
-            return result;
+            let ticket = await result.json();
+            return ticket;
         } catch (error) {
             console.log(error)
         }

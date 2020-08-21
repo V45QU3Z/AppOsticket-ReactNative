@@ -5,7 +5,7 @@ import { Text, View, Button, StyleSheet, TouchableOpacity, Alert, Modal,
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { TextInput, Snackbar } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
-import TicketService from '../../../services/Tickets';
+import TicketService from '../../../services/TicketsService';
 import {Feather, FontAwesome} from 'react-native-vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -18,13 +18,16 @@ export default function NewTicket({navigation}) {
   const _onDismissSnackBar = () => setVisible({snack: false});
   const _onDismissSnackBarError = () => setVisible({snackError: false});
 
+  const [role, setRole] = React.useState('');
   const [modalVisible, setModalVisible] = React.useState(true);
-  const [created, setCreated] = React.useState('');
+  const [created, setCreated] = React.useState(false);
+  const [numCreated, setNumCreated] = React.useState();
 
-  const [sede, setSede] = React.useState('4');
-  const [location, setLocation] = React.useState('8');
+  let location = '8';
+  let sede = '4';
+  let source = 'API';
   const [data, setData] = React.useState({
-    source: 'API',
+    source: source,
     name: '',
     email: '',
     sucursal: sede,
@@ -34,41 +37,49 @@ export default function NewTicket({navigation}) {
     subject: '',
     message: ''
   });
-
-
-  const titleInputChange=(val)=>{
-    if(val.trim().length >= 1){
-        setData({
-            ...data,
-            subject: val
-        })
-    }
-  }
-
-  const messageInputChange=(val)=>{
-        setData({
-            ...data,
-            message: val
-        })
-  }
-
     
     useEffect(() =>{
       async function async(){
         try {
           let getName = await AsyncStorage.getItem('name');
           let getMail = await AsyncStorage.getItem('email');
+          let rol = await AsyncStorage.getItem('rol');
           setData({
             ...data,
             name: getName,
             email: getMail
           });
+          setRole(rol)
         } catch (error) {
           console.log('Error:', error)
         }
       }
       async();
     }, [])
+
+    useFocusEffect(
+      React.useCallback(() => {
+        AsyncStorage.getItem('email').then(mail =>{
+          AsyncStorage.getItem('name').then(nam => {
+            setData({
+              ...data,
+              source: source,
+              sucursal: sede,
+              phone: '',
+              name: nam,
+              email: mail,
+              priority: '2',
+              location: location,
+              subject: '',
+              message: ''
+            })
+          })
+        })
+        return () => {
+          //alert('other unfocused');
+        };
+      }, [])
+  ); 
   
   //const info_user = getEmailAndName();
     const [isLoading, setIsLoading] = React.useState(false);
@@ -91,73 +102,60 @@ export default function NewTicket({navigation}) {
         text: 'CLOSE', onPress: () => {}
       }]);
     }
-  
-  async function saveTicket() {
-    //console.log(data);
-    setIsLoading(true)
-    if(data.subject=='' || data.message==''){
-      return(
-        isError()
-      )
-    }else{
-      try {
-        let user = await TicketService.create(data);
-        if(!user){
-          return(
-            isErrorOnServer()
-          )
-        }else{
-          //setModalVisible(!modalVisible);
-          setIsLoading(false)
-          isCreated();
-          //console.log(user)
-        }
-      } catch (error) {
-        console.log('Error create: ', error);
-      }
-    }
-    
-  }
 
-  async function testSave(){
-    if(!isNaN(data.phone) && data.phone.length > 6){
+  async function createTicket(){
+    if(!isNaN(data.phone) && (data.phone.length > 6 && data.phone.length <= 9)){
       setIsLoading(true)
-      if(data.subject=='' || data.message==''){
+      if(data.subject=='' || data.message=='' || data.phone==''){
         return(
           isError()
         )
       }else{
         try {
-          let user = await TicketService.create(data);
-          if(!user){
-            return(
-              isErrorOnServer()
-            )
-          }else{
-            setIsLoading(false)
-            isCreated();
-            //console.log(data.subject)
-            TicketService.getTicketCreated(data.subject)
-              .then(resp => {
-                setCreated(resp.number_created);
-              }).catch(err => {
-                console.log('Error al mostrar numero', err)
-              })
-            setData({phone: '', subject: '', message: ''})
-            //console.log(user)
-          }
+          let user = await TicketService.create(data);  
+            if(user != null || user != undefined){
+              setNumCreated(user);
+              setIsLoading(false)
+              setCreated(true)
+              isCreated();
+              setTimeout(() => {
+                Alert.alert('Operación Completada','El número de ticket creado es: '+user, [{
+                  text: 'Cerrar'
+                }])
+              }, 1000)
+              console.log(user)
+            }else{
+              setIsLoading(false)
+              setCreated(false)
+              isCreated();
+            }
+            let mail = await AsyncStorage.getItem('email');
+            let nam = await AsyncStorage.getItem('name');
+            setData({
+              ...data,
+              source: source,
+              sucursal: sede,
+              phone: '',
+              name: nam,
+              email: mail,
+              priority: '2',
+              location: location,
+              subject: '',
+              message: ''
+            })
+          
         } catch (error) {
+          isErrorOnServer()
           console.log('Error create: ', error);
         }
       }
     }else if(data.phone.length==0){
       return(isError())
     }else{
-      return Alert.alert('Error', 'Ingrese un número valido', [{
+      return Alert.alert('Error!', 'Por favor, ingrese un número válido', [{
         text: 'Ok'
       }])
     }
-    console.log(created)
     
     
   }
@@ -181,7 +179,7 @@ export default function NewTicket({navigation}) {
             {isLoading== true ?
                <View style={styles.contentLoading}>
                <Image
-                   style={styles.logo} resizeMode='stretch'
+                   style={styles.logo} resizeMode='center'
                    source={require('../../../../assets/loadingDual.gif')}/>
                    <Text style={{marginTop: -5, color: '#4caf50'}}>Creando Ticket...</Text>
                </View>
@@ -214,12 +212,12 @@ export default function NewTicket({navigation}) {
                 </View>
 
                 <TextInput label='Nombres Completos' placeholder='Fullname' style={styles.inputText}
-                  value={data.name} mode='flat'
+                  value={data.name} mode='flat' disabled={role=='user' ? true : false}
                 ></TextInput>
                 <TextInput label='Correo Electrónico' placeholder='Email' style={styles.inputText}
-                  value={data.email} mode='flat' 
+                  value={data.email} mode='flat' disabled={role=='user' ? true : false}
                 ></TextInput>
-                <TextInput label='Telefono' mode='flat' placeholder='Telefono' style={styles.inputText}
+                <TextInput label='Teléfono' mode='flat' placeholder='Teléfono' style={styles.inputText}
                  onChangeText={(val) => setData({...data, phone: val})} value={data.phone}
                 ></TextInput>
                 <TextInput label='Asunto' mode='flat' placeholder='Tema de Ayuda' style={styles.inputText}
@@ -237,7 +235,7 @@ export default function NewTicket({navigation}) {
               <TouchableHighlight
                 style={{ ...styles.openButton}}
                 onPress={() => {
-                  testSave()
+                  createTicket()
 
                 }}>
               <Text style={styles.textStyle, {marginLeft: 8}}><Icon color='#fff' name='send' size={25}></Icon> </Text>
@@ -265,19 +263,27 @@ export default function NewTicket({navigation}) {
           </Snackbar>
             
           <Snackbar
-                style={{backgroundColor: '#c8e6c9', marginTop: 10}}
+                style={created==true ? {backgroundColor: '#c8e6c9', marginTop: 10} : {backgroundColor: '#ffcdd2', marginTop: 10}}
                 wrapperStyle={{position: 'absolute', top: 0, }}
                 //wrapperStyle={{position: 'absolute', top: 15}}
                 visible={visible.snack}
-                duration={60000}
+                duration={3000}
                 onDismiss={_onDismissSnackBar}
-                action={{
-                    label: <Feather
+                action={created==true ?
+                  {label: <Feather
                     name='check' color='#4caf50' size={25}/>,
-                    onPress: () => {setVisible(false)}
-                }}
+                    onPress: () => {setVisible(false)}}
+                    :
+                    {label: <FontAwesome
+                      name='exclamation-circle' color='#E31500' size={25}/>,
+                      onPress: () => {}}
+                  }
             >
-          <Text style={{color: 'green', fontWeight: 'bold'}}>Ticket Creado Correctamente {created}</Text>
+          {created==true ?
+          <Text style={{color: 'green', fontWeight: 'bold'}}>OK! Ticket Creado Correctamente...</Text>
+          :
+          <Text style={{color: '#E31500', fontWeight: 'bold'}}>Error! El ticket no ha sido creado</Text>
+          }
           </Snackbar>
 
       </View>

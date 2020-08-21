@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Text, ActivityIndicator, StyleSheet, View, FlatList, Image, Alert } from 'react-native'
-import TicketsService from '../../../services/Tickets';
+import TicketsService from '../../../services/TicketsService';
 import { List, Searchbar } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
@@ -58,7 +58,7 @@ export default function TicketsList() {
                 refreshing: false
             })
             setLoadingMore(false)
-            //console.log(result.tickets);
+            console.log(result);
         } catch (error) {
             console.log(error)
         }
@@ -231,8 +231,11 @@ export default function TicketsList() {
                     >
                 </FlatList>
                 :
-                <Text style={{color: 'red', marginVertical: 10, fontWeight: 'bold'}}>
-                    No se encontro ningún ticket {searchQuery}</Text>
+                <View style={{flex: 1, alignItems: 'center'}}>
+                    <Image resizeMode='center' source={require("../../../../assets/404.png")}></Image>
+                    <Text style={{color: 'gray', marginTop: -25, fontWeight: 'bold', fontSize: 18}}>
+                        No se ha encontrado ningún ticket... {searchQuery}</Text>
+                </View>
                 }
                 
             </View>
@@ -286,7 +289,6 @@ const styles = StyleSheet.create({
     },
     contentEmerg:{
         elevation: 1,
-        marginVertical: 5,
         shadowColor: '#FFCDD2',
         shadowRadius: 3,
         shadowOffset: {
@@ -297,6 +299,7 @@ const styles = StyleSheet.create({
         borderRadius: 3,
         borderColor: '#FFCDD2',
         borderWidth: 1,
+        marginBottom: 10
     },
     itemtitle:{
         backgroundColor: '#b3e5fc',
