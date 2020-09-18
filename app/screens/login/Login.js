@@ -146,14 +146,14 @@ export default function Login() {
                     value="user"
                     status={ checked === 'user' ? 'checked' : 'unchecked' }
                     onPress={() => setChecked('user')}
-                    color='#0277bd' uncheckedColor='#76BDE7'
+                    color='#0277bd' 
                     />
                     <Text>Usuario</Text>
                 <RadioButton 
                     value="staff"
                     status={ checked === 'staff' ? 'checked' : 'unchecked' }
                     onPress={() => setChecked('staff')}
-                    color='#0277bd' uncheckedColor='#76BDE7'
+                    color='#0277bd'
                 />
                 <Text>Agente</Text>
                 </View>

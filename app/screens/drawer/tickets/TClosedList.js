@@ -37,6 +37,7 @@ export default function TClosedList() {
                         data: result.tickets,
                         refreshing: false
                     })
+                    setLoadingMore(true)
                 })
             }else{
                 console.log('Error')
@@ -84,6 +85,7 @@ export default function TClosedList() {
             showTickets
             setSearchQuery('')
             setLoadingSearch(false)
+            setLoadingMore(true)
           return () => {
             //alert('other unfocused');
            refreshList
@@ -103,47 +105,30 @@ export default function TClosedList() {
     }
 
     const handleLoadMore = async() => {
-        setLoadingMore(true)
-        //setData({isLoading: true})
-        console.log(page+limit)
+        if(loadingMore===false){
+            return false;
+        }else{
+            setLoadingMore(true)
+        }
         try {
             let result = await TicketsService.getAllTicketForParameter(ticket,'', page+limit, limit);
-            setPage(page+limit)
-            setLoadingMore(true)
-            setData({
-                isLoading: false,
-                data: data.data.concat(result.tickets),
-                refreshing: false
-            })            
+            if(result.tickets !== undefined){
+                setPage(page+limit)
+                setData({
+                    isLoading: false,
+                    data: data.data.concat(result.tickets),
+                    refreshing: false
+                }) 
+            }else{
+                setLoadingMore(false)
+                console.log('Error: no hay más datos')
+            }           
         } catch (error) {
             console.log(error)
         }
         //console.log('refe5rescabndo: ', page)
     } 
 
-    const finishedTickets = () => {
-        setLoadingMore(false)
-       console.log('no hay mas tickets')
-       /* setTimeout(() => {
-        return(
-            Alert.alert('Nota', 'No se econtraron mas tickets')
-        )
-       }, 2000) */
-    }
-
-    function dateCurrent(){
-        let date = new Date();
-        let day = date.getDate();
-        let month = date.getMonth()+1;
-        let year = date.getFullYear().toString().substr(-2);
-        if (month<10){
-                month = '0'+month;
-        }
-        if(day<10){
-            day= '0' +day
-        }
-        return year+'-'+month+'-'+day;
-    }
 
     async function searchTicketClosed(){
         setData({isLoading:true})
@@ -196,6 +181,10 @@ export default function TClosedList() {
                 <FlatList style={styles.flatlist} data={data.data} extraData={data} 
                 refreshing={data.refreshing} 
                 onRefresh={refreshList}
+                keyExtractor={(item, index) => index.toString()}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={renderFooter}
                 renderItem={({item}) => (
                 <View style={styles.contentview}>
                     <View style={styles.itemtitle}>
@@ -212,10 +201,7 @@ export default function TClosedList() {
                     //left={props => <List.Icon {...props} icon="folder" />}
                     />
                 </View>
-                )} keyExtractor={(item, index) => index.toString()}
-                onEndReached={(page+limit) > data.data.length ? finishedTickets : handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={renderFooter}
+                )} 
                 >
             </FlatList>
                 :

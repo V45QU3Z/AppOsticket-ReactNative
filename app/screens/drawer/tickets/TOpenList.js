@@ -37,6 +37,7 @@ export default function TicketsList() {
                         data: result.tickets,
                         refreshing: false
                     })
+                    setLoadingMore(true)
                 })
             }else{
                 console.log('Error')
@@ -83,6 +84,7 @@ export default function TicketsList() {
             showTickets
             setSearchQuery('')
             setLoadingSearch(false)
+            setLoadingMore(true)
           return () => {
             //alert('other unfocused');
            refreshList
@@ -102,46 +104,33 @@ export default function TicketsList() {
 
     const handleLoadMore = async() => {
         //setPage(page+limit);
-        setLoadingMore(true)
+        if(loadingMore===false){
+            return false;
+        }else{
+            setLoadingMore(true)
+        }
+        
         //setData({isLoading: true})
         try {
             let result = await TicketsService.getAllTicketForParameter(ticket,'', page+limit, limit);
-            setPage(page+limit)
-            //setLoadingMore(true)
-            setData({
-                isLoading: false,
-                data: data.data.concat(result.tickets),
-                refreshing: false
-            })            
+            if(result.tickets !== undefined){
+                setPage(page+limit)
+                setData({
+                    isLoading: false,
+                    data: data.data.concat(result.tickets),
+                    refreshing: false
+                }) 
+                console.log('data ok')
+            }else{
+                setLoadingMore(false)
+                console.log('Error: no hay más datos')
+            }
+            
         } catch (error) {
             console.log(error)
         }
         //console.log('refe5rescabndo: ', page)
     } 
-
-    const finishedTickets = () => {
-        setLoadingMore(false)
-       console.log('no hay mas tickets')
-       /* setTimeout(() => {
-        return(
-            Alert.alert('Nota', 'No se econtraron mas tickets')
-        )
-       }, 2000) */
-    }
-
-    function dateCurrent(){
-        let date = new Date();
-        let day = date.getDate();
-        let month = date.getMonth()+1;
-        let year = date.getFullYear().toString().substr(-2);
-        if (month<10){
-                month = '0'+month;
-        }
-        if(day<10){
-            day= '0' +day
-        }
-        return year+'-'+month+'-'+day;
-    }
        
      async function searchTickets(){
          setData({isLoading:true})
@@ -155,12 +144,12 @@ export default function TicketsList() {
             })
             setLoadingMore(false)
             setPage(0)
-            console.log(result.tickets)
+            console.log('Encontrado..', result.tickets)
         } catch (error) {
             
         }
     }
-    
+
 
         return (
            <View style={styles.container}>
@@ -192,6 +181,10 @@ export default function TicketsList() {
                     <FlatList style={styles.flatlist} data={data.data} extraData={data} 
                     refreshing={data.refreshing} 
                     onRefresh={refreshList}
+                    keyExtractor={(item, index) => index.toString()}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.3}
+                    ListFooterComponent={renderFooter} 
                     renderItem={({item}) => (
                     <View style={(item.priority==='Emergencia' || item.priority==='Alta') ? styles.contentEmerg : styles.contentview}>
                         <View style={(item.priority==='Emergencia' || item.priority==='Alta') ? styles.itemNotEmerg : styles.itemtitle}>
@@ -224,10 +217,7 @@ export default function TicketsList() {
                         //left={props => <List.Icon {...props} icon="folder" />}
                         />
                     </View>
-                    )} keyExtractor={(item, index) => index.toString()}
-                    onEndReached={(page+limit) > data.data.length ? finishedTickets : handleLoadMore}
-                    onEndReachedThreshold={0.3}
-                    ListFooterComponent={renderFooter} 
+                    )} 
                     >
                 </FlatList>
                 :

@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { View, StyleSheet, Picker, Text, Image, Alert } from 'react-native'
-import { DataTable, ProgressBar, Colors } from 'react-native-paper';
+import { View, StyleSheet, Picker, ActionSheetIOS, 
+    Text, Image, Platform, Modal, Alert, TouchableOpacity } from 'react-native'
+import { DataTable, ProgressBar, Button } from 'react-native-paper';
 import DashboardService from '../../../services/DashboardService';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+//import { PickerIOS } from '@react-native-community/picker';
+
 
 export default function DTHistory({navigation}) {
     
@@ -30,7 +33,7 @@ export default function DTHistory({navigation}) {
         }
         return yy;
     }
-
+    const [result, setResult] = useState("aqui text");
     let Listmonths = new Array("enero","febrero","marzo","abril","mayo","junio",
                         "julio","agosto","septiembre","octubre","noviembre","diciembre");
     let mm = new Date();
@@ -40,6 +43,9 @@ export default function DTHistory({navigation}) {
         month: month,
         year: year
     })
+
+    const [modalVisibleM, setModalVisibleM] = React.useState(false);
+    const [modalVisibleY, setModalVisibleY] = React.useState(false);
 
     const [data, setData] = useState({
         open: '',
@@ -149,7 +155,13 @@ export default function DTHistory({navigation}) {
         setLoadingRefresh(true);
         getHistoryTickets(selectDate.month, selectDate.year)   
     }
-   
+
+    const showModalMonth = () => {
+        setModalVisibleM(true)
+    }
+    const showModalYear = () => {
+        setModalVisibleY(true)
+    }
 
     return (
         <View style={styles.container}>
@@ -159,49 +171,125 @@ export default function DTHistory({navigation}) {
                     <Text style={styles.titleMonth}>Mes</Text>
                     <Text style={styles.titleYear}>Año</Text>
                 </View>
+
+                {Platform.OS==='ios' ?
                 <View style={styles.contentPickers}>
-                    {/* <View style={{marginLeft: 5, width: 70}}>
-                        <Text style={{color: '#474747'}}>{dateCurrent()}</Text>
-                    </View> */}
-                    <Picker itemStyle={styles.itemStyle}
-                        prompt='Seleccione el mes'
-                        selectedValue={selectDate.month}
-                        style={styles.pickerMonth}
-                        onValueChange={(itemValue, itemIndex) => {
-                            setSelectDate({
-                                ...selectDate,
-                                month: itemValue})
-                        }}>
-                        <Picker.Item label="Enero" value="enero" key='enero'/>
-                        <Picker.Item label="Febrero" value="febrero" key='febrero'/>
-                        <Picker.Item label="Marzo" value="marzo" key='marzo'/>
-                        <Picker.Item label="Abril" value="abril" key='abril'/>
-                        <Picker.Item label="Mayo" value="mayo" key='mayo'/>
-                        <Picker.Item label="Junio" value="junio" key='jun io'/>
-                        <Picker.Item label="Julio" value="julio" key='julio'/>
-                        <Picker.Item label="Agosto" value="agosto" key='maragostozo'/>
-                        <Picker.Item label="Septiembre" value="septiembre" key='septiembre'/>
-                        <Picker.Item label="Octubre" value="octubre" key='octubre'/>
-                        <Picker.Item label="Noviembre" value="noviembre" key='noviembre'/>
-                        <Picker.Item label="Diciembre" value="diciembre" key='diciembre'/>
+                    {/*  <Text style={styles.result}>{result}</Text> */}
+                    <TouchableOpacity onPress={showModalMonth} style={{padding: 7}}>
+                        <Text>{selectDate.month}
+                        <Text style={{fontSize: 15}}> +</Text></Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={showModalYear} style={{padding: 7}}>
+                        <Text>{selectDate.year}
+                        <Text style={{fontSize: 15}}> +</Text></Text>
+                    </TouchableOpacity>
+
+                <Modal 
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleM}
+                    onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");}}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                        <Picker itemStyle={styles.itemStyleIOS}
+                    prompt='Seleccione el mes'
+                    selectedValue={selectDate.month}
+                    style={styles.pickerMonth}
+                    onValueChange={(itemValue, itemIndex) => {
+                        setSelectDate({
+                            ...selectDate,
+                            month: itemValue})
+                    }}>
+                    <Picker.Item label="Enero" value="enero" key='enero'/>
+                    <Picker.Item label="Febrero" value="febrero" key='febrero'/>
+                    <Picker.Item label="Marzo" value="marzo" key='marzo'/>
+                    <Picker.Item label="Abril" value="abril" key='abril'/>
+                    <Picker.Item label="Mayo" value="mayo" key='mayo'/>
+                    <Picker.Item label="Junio" value="junio" key='jun io'/>
+                    <Picker.Item label="Julio" value="julio" key='julio'/>
+                    <Picker.Item label="Agosto" value="agosto" key='maragostozo'/>
+                    <Picker.Item label="Septiembre" value="septiembre" key='septiembre'/>
+                    <Picker.Item label="Octubre" value="octubre" key='octubre'/>
+                    <Picker.Item label="Noviembre" value="noviembre" key='noviembre'/>
+                    <Picker.Item label="Diciembre" value="diciembre" key='diciembre'/>
                     </Picker>
-                    <Picker
-                        selectedValue={selectDate.year}
-                        prompt='Seleccione el año'
-                        style={styles.pickerYear}
-                        onValueChange={(itemValue) => {
+                        </View>
+                        <Button style={styles.btnClosed} mode='contained' 
+                        onPress={() => {setModalVisibleM(false)}}>Cerrar</Button>
+                    </View>
+                    </Modal>
+
+                
+                    <Modal 
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleY}
+                    onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");}}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                        <Picker
+                            itemStyle={styles.itemStyleIOS}
+                            selectedValue={selectDate.year} 
+                            prompt='Seleccione el año'
+                            style={styles.pickerYear}
+                            onValueChange={(itemValue) => {
                             setSelectDate({
                                 ...selectDate,
                                 year: itemValue})
                         }}>
-                        {/* <Picker.Item label='2020' value='2020'></Picker.Item>
-                        <Picker.Item label='2019' value='2019'></Picker.Item>
-                        <Picker.Item label='2018' value='2018'></Picker.Item> */}
-                        {addYearInPicker().map(item => {
-                            return (<Picker.Item label={item.toString()} value={item} key={item}/>) 
-                        })}
-                    </Picker>
+                    {addYearInPicker().map(item => {
+                        return (<Picker.Item label={item.toString()} value={item} key={item}/>) 
+                    })}
+                </Picker>
+                        </View>
+                        <Button style={styles.btnClosed} mode='contained' 
+                        onPress={() => {setModalVisibleY(false)}}>Cerrar</Button>
+                    </View>
+                    </Modal>
+                
                 </View>
+                :
+                <View style={styles.contentPickers}>
+                <Picker itemStyle={styles.itemStyle}
+                    prompt='Seleccione el mes'
+                    selectedValue={selectDate.month}
+                    style={styles.pickerMonth}
+                    onValueChange={(itemValue, itemIndex) => {
+                        setSelectDate({
+                            ...selectDate,
+                            month: itemValue})
+                    }}>
+                    <Picker.Item label="Enero" value="enero" key='enero'/>
+                    <Picker.Item label="Febrero" value="febrero" key='febrero'/>
+                    <Picker.Item label="Marzo" value="marzo" key='marzo'/>
+                    <Picker.Item label="Abril" value="abril" key='abril'/>
+                    <Picker.Item label="Mayo" value="mayo" key='mayo'/>
+                    <Picker.Item label="Junio" value="junio" key='jun io'/>
+                    <Picker.Item label="Julio" value="julio" key='julio'/>
+                    <Picker.Item label="Agosto" value="agosto" key='maragostozo'/>
+                    <Picker.Item label="Septiembre" value="septiembre" key='septiembre'/>
+                    <Picker.Item label="Octubre" value="octubre" key='octubre'/>
+                    <Picker.Item label="Noviembre" value="noviembre" key='noviembre'/>
+                    <Picker.Item label="Diciembre" value="diciembre" key='diciembre'/>
+                </Picker>
+                <Picker
+                    selectedValue={selectDate.year}
+                    prompt='Seleccione el año'
+                    style={styles.pickerYear}
+                    onValueChange={(itemValue) => {
+                        setSelectDate({
+                            ...selectDate,
+                            year: itemValue})
+                    }}>
+                    {addYearInPicker().map(item => {
+                        return (<Picker.Item label={item.toString()} value={item} key={item}/>) 
+                    })}
+                </Picker>
+            </View>
+                }
+
             </View>
             {loading == true ? 
             <View style={styles.contentLoading}> 
@@ -294,6 +382,39 @@ const styles = StyleSheet.create({
         //marginTop: 10,
         paddingHorizontal: 15
     },
+    btnClosed: {
+        color: 'white',
+        backgroundColor: '#0277bd',
+        width: '80%'
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        //marginTop: 22,
+        //backgroundColor: '#000',
+        //opacity: 0.9
+      },
+      modalView: {
+        margin: 10,
+        backgroundColor: "#0277bd",
+        //opacity: 10,
+        width: '80%',
+        height: '40%',
+        borderRadius: 15,
+        padding: 10,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        //borderWidth: 1,
+        //borderColor: '#01579b'
+      },
     contentLoading: {
         flex: 1,
         //height: '100%',
@@ -351,8 +472,8 @@ const styles = StyleSheet.create({
         width: 110,
         color: '#474747'
     },
-    itemStyle: {
-        
+    itemStyleIOS: {
+        color: '#fff'
     },
     table: {
         borderWidth: 1,

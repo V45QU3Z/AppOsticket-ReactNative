@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
-import { Text, View, Button, StyleSheet, TouchableOpacity, Alert, Modal,
+import { Text, View, Platform, StyleSheet, TouchableOpacity, Alert, Modal,
   TouchableHighlight, ScrollView, Image, Picker
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { TextInput, Snackbar } from 'react-native-paper';
+import { TextInput, Snackbar, Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
 import TicketService from '../../../services/TicketsService';
 import {Feather, FontAwesome} from 'react-native-vector-icons';
@@ -22,6 +22,9 @@ export default function NewTicket({navigation}) {
   const [modalVisible, setModalVisible] = React.useState(true);
   const [created, setCreated] = React.useState(false);
   const [numCreated, setNumCreated] = React.useState();
+
+  const [modalVisibleP, setModalVisibleP] = React.useState(false);
+  const [modalVisibleD, setModalVisibleD] = React.useState(false);
 
   let location = '8';
   let sede = '4';
@@ -173,6 +176,16 @@ export default function NewTicket({navigation}) {
       return () => isSuscribed = false;
     }, [])
   );
+
+
+  const showModalPriority = () => {
+    setModalVisibleP(true)
+  }
+  const showModalDistrict = () => {
+    setModalVisibleD(true)
+  }
+
+
     return (
         <View style={styles.viewContainer}>
 
@@ -189,8 +202,68 @@ export default function NewTicket({navigation}) {
                 <ScrollView>
                 <Text style={styles.modalText}>Crear un nuevo Ticket</Text>
 
+                {Platform.OS==='ios' ?
                 <View style={styles.contentPickers}>
-                <Picker itemStyle={styles.itemStyle}
+                   <TouchableOpacity onPress={showModalDistrict} style={{padding: 7}}>
+                        <Text>{data.sucursal=='4' ? 'San Borja' : 'Otro'}
+                        <Text style={{fontSize: 15}}> +</Text></Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={showModalPriority} style={{padding: 7}}>
+                        <Text>{data.priority=='4' ? 'Emergencia' : (data.priority=='3' ?
+                        'Alta' : (data.priority=='2' ? 'Normal' : 'Baja'))}
+                        <Text style={{fontSize: 15}}> +</Text></Text>
+                    </TouchableOpacity>
+                  <Modal 
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleD}
+                    onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");}}>
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Picker itemStyle={styles.itemStyleIOS}
+                          prompt='Seleccione Sede'
+                          selectedValue={data.sucursal}
+                          style={styles.pickerSede}
+                          onValueChange={(itemValue, itemIndex) => console.log('Selected: ', itemValue)}>
+                          <Picker.Item label="San Borja" value="4" key='san borja'/>
+                        </Picker>
+                      </View>
+                      <Button style={styles.btnClosed} mode='contained'
+                      onPress={() => {setModalVisibleD(false)}}>Ok</Button>
+                    </View>
+                  </Modal>
+                  <Modal 
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleP}
+                    onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");}}>
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Picker itemStyle={styles.itemStyleIOS}
+                          prompt='Seleccione Prioridad'
+                          selectedValue={data.priority}
+                          style={styles.pickerPriority}
+                          onValueChange={(itemValue, itemIndex) => {setData({
+                            ...data, priority: itemValue
+                          })}}>
+                          <Picker.Item label="Normal" value="2" key='normal'/>
+                          <Picker.Item label="Emergencia" value="4" key='emergency'/>
+                          <Picker.Item label="Alta" value="3" key='alta'/>
+                          <Picker.Item label="Baja" value="1" key='baja'/>
+                        </Picker>
+                      </View>
+                      <Button style={styles.btnClosed} mode='contained'
+                      onPress={() => {setModalVisibleP(false)}}>Ok</Button>
+                    </View>
+                  </Modal>
+                </View>
+
+                
+                :
+                <View style={styles.contentPickers}>
+                  <Picker itemStyle={styles.itemStyle}
                         prompt='Seleccione Sede'
                         selectedValue={data.sucursal}
                         style={styles.pickerSede}
@@ -210,6 +283,7 @@ export default function NewTicket({navigation}) {
                         <Picker.Item label="Baja" value="1" key='baja'/>
                     </Picker>
                 </View>
+                }
 
                 <TextInput label='Nombres Completos' placeholder='Fullname' style={styles.inputText}
                   value={data.name} mode='flat' disabled={role=='user' ? true : false}
@@ -296,11 +370,48 @@ const styles = StyleSheet.create({
     //paddingVertical: 10,
     width: '100%',
 },
+itemStyleIOS: {
+  color: '#fff'
+},
+btnClosed: {
+  color: 'white',
+  backgroundColor: '#0277bd',
+  width: '80%'
+},
 btnContent: {
     position: 'absolute',
     right: 0,
     marginTop: 15
     //top: 15
+},
+centeredView: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  //marginTop: 22,
+  //backgroundColor: '#000',
+  //opacity: 0.9
+},
+modalView: {
+  marginTop: 100,
+  margin: 10,
+  backgroundColor: "#0277bd",
+  //opacity: 10,
+  width: '80%',
+  height: '40%',
+  borderRadius: 15,
+  padding: 10,
+  alignItems: "center",
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
+  //borderWidth: 1,
+  //borderColor: '#01579b'
 },
 contentLoading: {
   flex: 1,

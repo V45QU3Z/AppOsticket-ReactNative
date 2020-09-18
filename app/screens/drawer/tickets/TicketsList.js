@@ -42,6 +42,7 @@ export default function TicketsList() {
                         data: result.tickets,
                         refreshing: false
                     })
+                    setLoadingMore(true)
                 })
             }else{
                 console.log('Error')
@@ -90,6 +91,7 @@ export default function TicketsList() {
             setPage(0)
             setSearchQuery('')
             setLoadingSearch(false)
+            setLoadingMore(true)
           return () => {
             //alert('other unfocused');
            refreshList
@@ -108,31 +110,29 @@ export default function TicketsList() {
     }
 
     const handleLoadMore = async() => {
-        setLoadingMore(true)
-        console.log(page+limit)
+        if(loadingMore===false){
+            return false;
+        }else{
+            setLoadingMore(true)
+        }
         try {
             let result = await TicketsService.getAllTicketForParameter(ticket,'', page+limit, limit);
-            setPage(page+limit)   
-            setData({
-                isLoading: false,
-                data: data.data.concat(result.tickets),
-                refreshing: false
-            })                 
+            if(result.tickets !== undefined){
+                setPage(page+limit)   
+                setData({
+                    isLoading: false,
+                    data: data.data.concat(result.tickets),
+                    refreshing: false
+                })
+            }else{
+                setLoadingMore(false)
+                console.log('Error: no hay más datos')
+            }                 
         } catch (error) {
             console.log(error)
         }
         //console.log('refe5rescabndo: ', page)
     } 
-
-    const finishedTickets = () => {
-        setLoadingMore(false)
-       console.log('no hay mas tickets')
-       /* setTimeout(() => {
-        return(
-            Alert.alert('Nota', 'No se econtraron mas tickets')
-        )
-       }, 2000) */
-    }
 
     function dateCurrent(){
         let date = new Date();
@@ -197,6 +197,10 @@ export default function TicketsList() {
                     <FlatList style={styles.flatlist} data={data.data} extraData={data} 
                     refreshing={data.refreshing} 
                     onRefresh={refreshList}
+                    keyExtractor={(item, index) => index.toString()}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.3}
+                    ListFooterComponent={renderFooter}
                     renderItem={({item}) => (
                     <View style={(item.priority=='Emergencia' || item.priority=='Alta') ? 
                                     styles.contentEmerg
@@ -237,10 +241,7 @@ export default function TicketsList() {
                         //left={props => <List.Icon {...props} icon="folder" />}
                         />
                     </View>
-                    )} keyExtractor={(item, index) => index.toString()}
-                    onEndReached={(page+limit) > data.data.length ? finishedTickets : handleLoadMore}
-                    onEndReachedThreshold={0.3}
-                    ListFooterComponent={renderFooter} 
+                    )}  
                     >
                 </FlatList>
                 :
